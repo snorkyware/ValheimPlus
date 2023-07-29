@@ -57,6 +57,10 @@ namespace ValheimPlus.GameClasses
                 __instance.m_maxFuel = Configuration.Current.EitrRefinery.maximumSoftTissue;
                 __instance.m_secPerProduct = Configuration.Current.EitrRefinery.productionSpeed;
             }
+
+            // an ore count >= 256 will corrupt the save, as it only supports 255 ores in the queue.
+            // limit to 250 as the closest round number.
+            __instance.m_maxOre = Helper.Clamp(__instance.m_maxOre, 1, 250);
         }
 
     }
