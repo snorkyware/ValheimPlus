@@ -6,7 +6,7 @@ Assume any combinations not listed do not work. Valheim game versions that are t
 such as `Valheim 0.216.8` (Steam) vs `Valheim ms-0.216.8` (Microsoft game store) - should often work fine, but may
 sometimes have minor differences that require extra effort to offer compatibility for.
 
-Note that alpha versions, while being compatible, could still run 
+Note that alpha versions, while being compatible, have a higher likelihood of having bugs.
 
 ### Valheim 0.217 PTB
 
