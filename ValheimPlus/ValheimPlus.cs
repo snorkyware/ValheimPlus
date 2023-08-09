@@ -33,6 +33,12 @@ namespace ValheimPlus
         // Minimum required version for full compatibility.
         public const string minRequiredNumericVersion = numericVersion;
 
+        // The lowest game version this version of V+ is known to work with.
+        public static readonly GameVersion minSupportedGameVersion = new GameVersion(0, 217, 11);
+
+        // The game version this version of V+ was compiled against.
+        public static readonly GameVersion targetGameVersion = new GameVersion(0, 217, 11);
+
         public static string newestVersion = "";
         public static bool isUpToDate = false;
         public static new ManualLogSource Logger { get; private set; }
@@ -126,6 +132,16 @@ namespace ValheimPlus
             }
         }
 
+        public static bool isGameVersionTooOld()
+        {
+            return Version.CurrentVersion < minSupportedGameVersion;
+        }
+
+        public static bool isGameVersionNewerThanTarget()
+        {
+            return Version.CurrentVersion > targetGameVersion;
+        }
+
         public static bool IsNewVersionAvailable()
         {
             WebClient client = new WebClient();
@@ -173,33 +189,67 @@ namespace ValheimPlus
 
         public static void PatchAll()
         {
-
-            // handles annotations
-            harmony.PatchAll();
-
-            // manual patches
-            // patches that only should run in certain conditions, that otherwise would just cause errors.
-
-            // HarmonyPriority wasn't loading in the order I wanted, so manually load this one after the annotations are all loaded
-            harmony.Patch(
-                    original: typeof(ZPlayFabMatchmaking).GetMethod("CreateLobby", BindingFlags.NonPublic | BindingFlags.Instance),
-                    transpiler: new HarmonyMethod(typeof(ZPlayFabMatchmaking_CreateLobby_Transpiler).GetMethod("Transpiler")));
-
-            // steam only patches
-            if (AppDomain.CurrentDomain.GetAssemblies().Any(assembly => assembly.FullName.Contains("assembly_steamworks")))
+            Logger.LogInfo("Applying patches.");
+            try
             {
-                harmony.Patch(
-                    original: AccessTools.TypeByName("SteamGameServer").GetMethod("SetMaxPlayerCount"),
-                    prefix: new HarmonyMethod(typeof(ChangeSteamServerVariables).GetMethod("Prefix")));
-            }
+                // handles annotations
+                harmony.PatchAll();
 
-            // enable mod enforcement with VersionCheck from ServerSync
-            ((VersionCheck) versionCheck).ModRequired = Configuration.Current.Server.enforceMod;
+                // manual patches
+                // patches that only should run in certain conditions, that otherwise would just cause errors.
+
+                // HarmonyPriority wasn't loading in the order I wanted, so manually load this one after the annotations are all loaded
+                harmony.Patch(
+                        original: typeof(ZPlayFabMatchmaking).GetMethod("CreateLobby", BindingFlags.NonPublic | BindingFlags.Instance),
+                        transpiler: new HarmonyMethod(typeof(ZPlayFabMatchmaking_CreateLobby_Transpiler).GetMethod("Transpiler")));
+
+                // steam only patches
+                if (AppDomain.CurrentDomain.GetAssemblies().Any(assembly => assembly.FullName.Contains("assembly_steamworks")))
+                {
+                    harmony.Patch(
+                        original: AccessTools.TypeByName("SteamGameServer").GetMethod("SetMaxPlayerCount"),
+                        prefix: new HarmonyMethod(typeof(ChangeSteamServerVariables).GetMethod("Prefix")));
+                }
+
+                // enable mod enforcement with VersionCheck from ServerSync
+                ((VersionCheck)versionCheck).ModRequired = Configuration.Current.Server.enforceMod;
+                Logger.LogInfo("Patches successfully applied.");
+            }
+            catch (Exception e)
+            {
+                Logger.LogError($"Failed to apply patches. Exception:\n{e}");
+                if (isGameVersionTooOld())
+                {
+                    Logger.LogWarning($"This version of Valheim Plus ({fullVersion}) expects a minimum game version of \"{minSupportedGameVersion}\", but this game version is older at \"{Version.CurrentVersion}\". " +
+                        $"Please either update the Valheim game, or use an older version of Valheim Plus.");
+                }
+                else if (isGameVersionNewerThanTarget())
+                {
+                    Logger.LogWarning($"This version of Valheim Plus ({fullVersion}) was compiled with a game version of \"{targetGameVersion}\", but this game version is newer at \"{Version.CurrentVersion}\". " +
+                        "If you are using the PTB, you likely need to use the non-beta version of the game. " +
+                        "Otherwise, the errors seen above likely will require the Valheim Plus mod to be updated. If a game update just came out for Valheim, this may take some time for the mod to be updated.");
+                }
+                else
+                {
+                    Logger.LogWarning($"Valheim Plus failed to apply patches. Please ensure the game version ({Version.GetVersionString()}) is compatible with " +
+                        $"the Valheim Plus version ({fullVersion}) at https://github.com/Grantapher/ValheimPlus/blob/grantapher-development/COMPATIBILITY.md. " +
+                        $"If it already is, please report a bug at https://github.com/Grantapher/ValheimPlus/issues.");
+                }
+            }
         }
 
         public static void UnpatchSelf()
         {
-            harmony.UnpatchSelf();
+            Logger.LogInfo("Unpatching.");
+            try
+            {
+                harmony.UnpatchSelf();
+                Logger.LogInfo("Successfully unpatched.");
+            }
+            catch (Exception e)
+            {
+                Logger.LogError($"Failed to unpatch. Exception: {e}");
+            }
         }
     }
 }
