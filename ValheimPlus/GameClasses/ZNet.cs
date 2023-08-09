@@ -123,20 +123,24 @@ namespace ValheimPlus.GameClasses
         }
     }
 
-    [HarmonyPatch(typeof(ZNet), "RPC_RefPos")]
+    [HarmonyPatch(typeof(ZNet), "RPC_ServerSyncedPlayerData")]
     public static class PlayerPositionWatcher
     {
-        private static void Postfix(ref ZNet __instance, ZRpc rpc, Vector3 pos, bool publicRefPos)
+        private static void Postfix(ref ZNet __instance, ZRpc rpc)
         {
             if (!__instance.IsServer()) return;
 
             if (Configuration.Current.Map.IsEnabled && Configuration.Current.Map.shareMapProgression)
             {
+                ZNetPeer peer = __instance.GetPeer(rpc);
+                if (peer == null) return;
+                Vector3 pos = peer.m_refPos;
                 Minimap.instance.WorldToPixel(pos, out int pixelX, out int pixelY);
 
                 int radiusPixels =
                     (int)Mathf.Ceil(Configuration.Current.Map.exploreRadius / Minimap.instance.m_pixelSize);
 
+                // todo this looks like it can be optimized better
                 for (int y = pixelY - radiusPixels; y <= pixelY + radiusPixels; ++y)
                 {
                     for (int x = pixelX - radiusPixels; x <= pixelX + radiusPixels; ++x)
