@@ -54,6 +54,7 @@ namespace ValheimPlus.GameClasses
         }
     }
 
+    // todo it seems that this only decreases the damage of the player, not increases enemy health.
     /// <summary>
     /// Alter game difficulty health scale for enemies
     /// </summary>
