@@ -217,17 +217,18 @@ namespace ValheimPlus
             }
             catch (Exception e)
             {
-                Logger.LogError($"Failed to apply patches. Exception:\n{e}");
+                Logger.LogError($"Failed to apply patches.");
                 if (isGameVersionTooOld())
                 {
                     Logger.LogWarning($"This version of Valheim Plus ({fullVersion}) expects a minimum game version of \"{minSupportedGameVersion}\", but this game version is older at \"{Version.CurrentVersion}\". " +
-                        $"Please either update the Valheim game, or use an older version of Valheim Plus.");
+                        $"Please either update the Valheim game, or use an older version of Valheim Plus as per https://github.com/Grantapher/ValheimPlus/blob/grantapher-development/COMPATIBILITY.md.");
                 }
                 else if (isGameVersionNewerThanTarget())
                 {
                     Logger.LogWarning($"This version of Valheim Plus ({fullVersion}) was compiled with a game version of \"{targetGameVersion}\", but this game version is newer at \"{Version.CurrentVersion}\". " +
                         "If you are using the PTB, you likely need to use the non-beta version of the game. " +
-                        "Otherwise, the errors seen above likely will require the Valheim Plus mod to be updated. If a game update just came out for Valheim, this may take some time for the mod to be updated.");
+                        "Otherwise, the errors seen above likely will require the Valheim Plus mod to be updated. If a game update just came out for Valheim, this may take some time for the mod to be updated. " +
+                        "See https://github.com/Grantapher/ValheimPlus/blob/grantapher-development/COMPATIBILITY.md for what game versions are compatible with what mod versions.");
                 }
                 else
                 {
@@ -235,6 +236,9 @@ namespace ValheimPlus
                         $"the Valheim Plus version ({fullVersion}) at https://github.com/Grantapher/ValheimPlus/blob/grantapher-development/COMPATIBILITY.md. " +
                         $"If it already is, please report a bug at https://github.com/Grantapher/ValheimPlus/issues.");
                 }
+
+                // rethrow, otherwise it may not be obvious to the user that patching failed
+                throw e;
             }
         }
 
