@@ -10,6 +10,7 @@ Note that alpha versions, while being compatible, have a higher likelihood of ha
 
 ### Valheim 0.217 PTB
 
+* ✅ - `Valheim 0.217.13 (n-11)` + `BepInExPack_Valheim 5.4.2105` + `ValheimPlus 0.9.9.17-alpha02`
 * ✅ - `Valheim 0.217.12 (n-10)` + `BepInExPack_Valheim 5.4.2105` + `ValheimPlus 0.9.9.17-alpha02`
 * ✅ - `Valheim 0.217.11 (n-9)` + `BepInExPack_Valheim 5.4.2105` + `ValheimPlus 0.9.9.17-alpha02`
 * ✅ - `Valheim 0.217.7 (n-7)` + `BepInExPack_Valheim 5.4.2105` + `ValheimPlus 0.9.9.17-alpha01`
