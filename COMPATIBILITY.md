@@ -8,6 +8,9 @@ sometimes have minor differences that require extra effort to offer compatibilit
 
 Note that alpha versions, while being compatible, have a higher likelihood of having bugs.
 
+### Valheim 0.217.14
+* ✅ - `Valheim 0.217.14 (n-12)` + `BepInExPack_Valheim 5.4.2105` + `ValheimPlus 0.9.9.17`
+
 ### Valheim 0.217 PTB
 
 * ✅ - `Valheim 0.217.14 (n-12)` + `BepInExPack_Valheim 5.4.2105` + `ValheimPlus 0.9.9.17-alpha02`

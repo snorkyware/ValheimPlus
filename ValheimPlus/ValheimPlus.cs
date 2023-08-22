@@ -25,7 +25,7 @@ namespace ValheimPlus
         public const string numericVersion = "0.9.9.17";
 
         // Extra version, like alpha/beta/rc/stable. Can leave blank if a stable release.
-        public const string versionExtra = "-alpha02";
+        public const string versionExtra = "";
 
         // Version used when numeric is NOT required (Logging, config file lookup)
         public const string fullVersion = numericVersion + versionExtra;
@@ -37,7 +37,7 @@ namespace ValheimPlus
         public static readonly GameVersion minSupportedGameVersion = new GameVersion(0, 217, 11);
 
         // The game version this version of V+ was compiled against.
-        public static readonly GameVersion targetGameVersion = new GameVersion(0, 217, 11);
+        public static readonly GameVersion targetGameVersion = new GameVersion(0, 217, 14);
 
         public static string newestVersion = "";
         public static bool isUpToDate = false;
