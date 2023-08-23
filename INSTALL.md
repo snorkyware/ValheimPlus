@@ -23,7 +23,7 @@ If you want to avoid the headache of manual installation at the cost of download
 If any of these sections don't apply to you, skip them.
 
 #### Hosted Server
-If your server host automatically installs ValheimPlus for you, there is a good chance it is installing the official version, which is broken with the current Valheim game. In this case, choose one of the installation ZIPs with `Renamed` in the filename.
+If your server host automatically installs ValheimPlus for you, there is a chance it is installing the wrong version, which is broken with the current Valheim game. In this case, choose one of the installation ZIPs with `Renamed` in the filename.
 
 The only difference is that the mod file has a different filename `ValheimPlusGrantapher.dll`, this is so that it doesn't get overwritten by your server host when it overwrites `ValheimPlus.dll`. Upon loading mods, BepInEx will recognize the two mods are the same and select the one with the newest version (`ValheimPlusGrantapher.dll`).
 
