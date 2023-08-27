@@ -428,19 +428,54 @@ namespace ValheimPlus.GameClasses
     [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
     public static class Player_UpdatePlacementGhost_Patch
     {
-        private static bool Prefix(ref Player __instance, bool flashGuardStone)
+        private static Vector3? ghostPosition = null;
+        private static Quaternion? ghostRotation = null;
+        private static Vector3? markerPosition = null;
+        private static Quaternion? markerRotation = null;
+
+        private static void Prefix(ref Player __instance, bool flashGuardStone)
         {
             if (ABM.isActive)
             {
-                // Skip the original method
-                return false;
+                // ABM controls the ghost/marker position, so undo any ghost/marker changes the patched method
+                // does by storing the transforms in the prefix and then applying them in the postfix.
+                if (__instance.m_placementGhost) 
+                {
+                    ghostPosition = __instance.m_placementGhost.transform.position + Vector3.zero;
+                    ghostRotation = __instance.m_placementGhost.transform.rotation * Quaternion.identity;
+                }
+                if (__instance.m_placementMarkerInstance)
+                {
+                    markerPosition = __instance.m_placementMarkerInstance.transform.position + Vector3.zero;
+                    markerRotation = __instance.m_placementMarkerInstance.transform.rotation * Quaternion.identity;
+                }
             }
-
-            return true;
         }
 
         private static void Postfix(ref Player __instance)
         {
+            if (ABM.isActive)
+            {
+                // todo this may not be enough to make building functionally the same.
+                //  a better way may be to intercept all position/rotation assignments and ignore them.
+                //  I'm concerned that the build reject logic will use the transforms that we are undo-ing here.
+                //  Seems pretty likely.
+                __instance.m_placementGhost.transform.position = (Vector3) ghostPosition;
+                __instance.m_placementGhost.transform.rotation = (Quaternion) ghostRotation;
+                ghostPosition = null;
+                ghostRotation = null;
+                __instance.m_placementMarkerInstance.transform.position = (Vector3) markerPosition;
+                __instance.m_placementMarkerInstance.transform.rotation = (Quaternion) markerRotation;
+                markerPosition = null;
+                markerRotation = null;
+
+                // marker isn't really useful in ABM
+                if (__instance.m_placementMarkerInstance)
+                {
+                    __instance.m_placementMarkerInstance.SetActive(false);
+                }
+            }
+
             if (ABM.exitOnNextIteration)
             {
                 try
