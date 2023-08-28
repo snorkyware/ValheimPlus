@@ -15,23 +15,30 @@ namespace ValheimPlus.GameClasses
     [HarmonyPatch(typeof(Smelter), nameof(Smelter.Awake))]
     public static class Smelter_Awake_Patch
     {
-        private static void Prefix(ref Smelter __instance)
+        private static void Prefix(Smelter __instance)
         {
+            void clampOre(int amount)
+            {
+                // an ore count >= 256 will corrupt the save, as it only supports 255 ores in the queue.
+                // limit to 250 as the closest round number.
+                __instance.m_maxOre = Helper.Clamp(amount, 1, 250);
+            }
+
             if (__instance.m_name.Equals(SmelterDefinitions.KilnName) && Configuration.Current.Kiln.IsEnabled)
             {
-                __instance.m_maxOre = Configuration.Current.Kiln.maximumWood;
+                clampOre(Configuration.Current.Kiln.maximumWood);
                 __instance.m_secPerProduct = Configuration.Current.Kiln.productionSpeed;
             }
             else if (__instance.m_name.Equals(SmelterDefinitions.SmelterName) && Configuration.Current.Smelter.IsEnabled)
             {
-                __instance.m_maxOre = Configuration.Current.Smelter.maximumOre;
+                clampOre(Configuration.Current.Smelter.maximumOre);
                 __instance.m_maxFuel = Configuration.Current.Smelter.maximumCoal;
                 __instance.m_secPerProduct = Configuration.Current.Smelter.productionSpeed;
                 __instance.m_fuelPerProduct = Configuration.Current.Smelter.coalUsedPerProduct;
             }
             else if (__instance.m_name.Equals(SmelterDefinitions.FurnaceName) && Configuration.Current.Furnace.IsEnabled)
             {
-                __instance.m_maxOre = Configuration.Current.Furnace.maximumOre;
+                clampOre(Configuration.Current.Furnace.maximumOre);
                 __instance.m_maxFuel = Configuration.Current.Furnace.maximumCoal;
                 __instance.m_secPerProduct = Configuration.Current.Furnace.productionSpeed;
                 __instance.m_fuelPerProduct = Configuration.Current.Furnace.coalUsedPerProduct;
@@ -43,24 +50,20 @@ namespace ValheimPlus.GameClasses
             }
             else if (__instance.m_name.Equals(SmelterDefinitions.WindmillName) && Configuration.Current.Windmill.IsEnabled)
             {
-                __instance.m_maxOre = Configuration.Current.Windmill.maximumBarley;
+                clampOre(Configuration.Current.Windmill.maximumBarley);
                 __instance.m_secPerProduct = Configuration.Current.Windmill.productionSpeed;
             }
             else if (__instance.m_name.Equals(SmelterDefinitions.SpinningWheelName) && Configuration.Current.SpinningWheel.IsEnabled)
             {
-                __instance.m_maxOre = Configuration.Current.SpinningWheel.maximumFlax;
+                clampOre(Configuration.Current.SpinningWheel.maximumFlax);
                 __instance.m_secPerProduct = Configuration.Current.SpinningWheel.productionSpeed;
             }
             else if (__instance.m_name.Equals(SmelterDefinitions.EitrRefineryName) && Configuration.Current.EitrRefinery.IsEnabled)
             {
-                __instance.m_maxOre = Configuration.Current.EitrRefinery.maximumSap;
+                clampOre(Configuration.Current.EitrRefinery.maximumSap);
                 __instance.m_maxFuel = Configuration.Current.EitrRefinery.maximumSoftTissue;
                 __instance.m_secPerProduct = Configuration.Current.EitrRefinery.productionSpeed;
             }
-
-            // an ore count >= 256 will corrupt the save, as it only supports 255 ores in the queue.
-            // limit to 250 as the closest round number.
-            __instance.m_maxOre = Helper.Clamp(__instance.m_maxOre, 1, 250);
         }
 
     }
@@ -216,6 +219,11 @@ namespace ValheimPlus.GameClasses
                     return;
                 autoFuelRange = Configuration.Current.EitrRefinery.autoRange;
                 ignorePrivateAreaCheck = Configuration.Current.EitrRefinery.ignorePrivateAreaCheck;
+            } 
+            else
+            {
+                // unknown smelter instance
+                return;
             }
 
             autoFuelRange = Helper.Clamp(autoFuelRange, 1, 50);
