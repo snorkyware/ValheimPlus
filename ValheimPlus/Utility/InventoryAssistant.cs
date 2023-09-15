@@ -33,6 +33,8 @@ namespace ValheimPlus
                 {
                     Container foundContainer = hitCollider.GetComponentInParent<Container>();
 
+                    if (!foundContainer)
+                        continue;
                     if (validContainers.Contains(foundContainer))
                         continue;
 
