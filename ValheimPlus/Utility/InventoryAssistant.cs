@@ -32,6 +32,10 @@ namespace ValheimPlus
                 try
                 {
                     Container foundContainer = hitCollider.GetComponentInParent<Container>();
+
+                    if (validContainers.Contains(foundContainer))
+                        continue;
+
                     bool hasAccess = foundContainer.CheckAccess(Player.m_localPlayer.GetPlayerID());
                     if (checkWard) hasAccess = hasAccess && PrivateArea.CheckAccess(hitCollider.gameObject.transform.position, 0f, false, true);
                     var piece = foundContainer.GetComponentInParent<Piece>();
