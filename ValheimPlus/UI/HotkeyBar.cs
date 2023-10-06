@@ -1,8 +1,8 @@
 ﻿using HarmonyLib;
 using UnityEngine;
-using UnityEngine.UI;
 using ValheimPlus.Configurations;
 using System.Linq;
+using TMPro;
 
 namespace ValheimPlus.UI
 {
@@ -52,16 +52,21 @@ namespace ValheimPlus.UI
             {
                 // Create a new text element to display the ammo counts
                 HotkeyBar.ElementData element = __instance.m_elements[bow.m_gridPos.x];
+
+                TMP_Text ammoCounterText;
                 if (ammoCounter == null)
                 {
                     ammoCounter = GameObject.Instantiate(element.m_amount.gameObject, element.m_amount.gameObject.transform.parent, false);
                     ammoCounter.name = hudObjectName;
                     ammoCounter.SetActive(true);
-                    Vector3 offset = element.m_amount.gameObject.transform.position - element.m_icon.transform.position;
+                    Vector3 offset = element.m_amount.gameObject.transform.position - element.m_icon.transform.position - new Vector3(0, 15);
                     ammoCounter.transform.Translate(offset);
-                    Text ammoText = ammoCounter.GetComponentInChildren<Text>();
-                    ammoText.fontSize -= 2;
-
+                    ammoCounterText = ammoCounter.GetComponentInChildren<TMP_Text>();
+                    ammoCounterText.fontSize -= 2;
+                } 
+                else
+                {
+                    ammoCounterText = ammoCounter.GetComponentInChildren<TMP_Text>();
                 }
 
                 // Attach it to the hotbar icon
@@ -89,7 +94,6 @@ namespace ValheimPlus.UI
                 }
 
                 // Change the visual display text for the UI
-                Text ammoCounterText = ammoCounter.GetComponentInChildren<Text>();
                 if (totalAmmo == 0)
                     ammoCounterText.text = noAmmoDisplay;
                 else

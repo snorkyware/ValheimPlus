@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using ValheimPlus.Configurations;
@@ -60,7 +61,7 @@ namespace ValheimPlus.GameClasses
                             banner.transform.SetParent(joinpanel.transform, false);
                             banner.transform.localPosition = banner.transform.localPosition + new Vector3(0, -300);
                             banner.GetComponent<RectTransform>().sizeDelta = new Vector2(315, 315);
-                            banner.transform.GetChild(0).GetComponent<Text>().text = "";
+                            banner.transform.GetChild(0).GetComponent<TMP_Text>().text = "";
                             banner.transform.GetChild(1).gameObject.SetActive(false);
                             GameObject bannerButton = DefaultControls.CreateButton(uiResources);
                             bannerButton.transform.SetParent(banner.transform, false);

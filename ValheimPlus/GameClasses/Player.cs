@@ -5,8 +5,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using ValheimPlus.Configurations;
 using ValheimPlus.RPC;
 
@@ -90,16 +90,14 @@ namespace ValheimPlus.GameClasses
 
                 Hud hud = Hud.instance;
 
-                Text timeText;
+                TMP_Text timeText;
                 if (timeObj == null)
                 {
                     MessageHud msgHud = MessageHud.instance;
 
                     timeObj = new GameObject();
                     timeObj.transform.SetParent(hud.m_statusEffectListRoot.transform.parent);
-                    timeObj.AddComponent<RectTransform>();
-
-                    timeText = timeObj.AddComponent<Text>();
+                    timeText = timeObj.AddComponent<TextMeshProUGUI>();
 
                     float rRatio = Mathf.Clamp01((float)Configuration.Current.GameClock.textRedChannel / 255f);
                     float gRatio = Mathf.Clamp01((float)Configuration.Current.GameClock.textGreenChannel / 255f);
@@ -110,10 +108,14 @@ namespace ValheimPlus.GameClasses
                     timeText.font = msgHud.m_messageCenterText.font;
                     timeText.fontSize = Configuration.Current.GameClock.textFontSize;
                     timeText.enabled = true;
-                    timeText.alignment = TextAnchor.MiddleCenter;
-                    timeText.horizontalOverflow = HorizontalWrapMode.Overflow;
+                    timeText.alignment = TextAlignmentOptions.Center;
+                    timeText.overflowMode = TextOverflowModes.Overflow;
+
+                    RectTransform rect = timeText.GetComponent<RectTransform>();
+                    Vector2 size = rect.sizeDelta;
+                    rect.sizeDelta = new Vector2(size.x * 2, size.y);
                 }
-                else timeText = timeObj.GetComponent<Text>();
+                else timeText = timeObj.GetComponent<TMP_Text>();
 
                 EnvMan env = EnvMan.instance;
                 // only update the time at most once per minute

@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,7 +14,7 @@ namespace ValheimPlus.GameClasses
             Toggle cmToggle = Settings.instance.m_continousMusic;
             muteAudioToggle = GameObject.Instantiate(cmToggle, cmToggle.transform.parent, false);
             muteAudioToggle.name = "MuteGameInBackground";
-            muteAudioToggle.GetComponentInChildren<Text>().text = "Mute Game in Background";
+            muteAudioToggle.GetComponentInChildren<TMP_Text>().text = "Mute Game in Background";
 
             // scaleFactor is overwritten by GuiScaler::UpdateScale, which is called every frame, but impacted when pressing OK in the settings dialog
             CanvasScaler canvasScalerComponent = muteAudioToggle.transform.root.GetComponentInChildren<CanvasScaler>();

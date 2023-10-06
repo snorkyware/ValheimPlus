@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -40,7 +41,7 @@ namespace ValheimPlus
 
             // set up deconstruct inventory tab
             m_tabDeconstruct = Object.Instantiate<Button>(Deconstruct.__inventoryGui.m_tabUpgrade);
-            m_tabDeconstruct.GetComponentInChildren<Text>().text = deconstructText.ToUpper(); // needs localization
+            m_tabDeconstruct.GetComponentInChildren<TMP_Text>().text = deconstructText.ToUpper(); // needs localization
             m_tabDeconstruct.gameObject.SetActive(true);
             m_tabDeconstruct.transform.SetParent(Deconstruct.__inventoryGui.m_tabUpgrade.transform.parent, false);
 
@@ -126,7 +127,7 @@ namespace ValheimPlus
                 // set recipe text
                 __inventoryGui.m_recipeName.text = str;
 
-                // set recipe description 
+                // set recipe description
                 __inventoryGui.m_recipeDecription.text = Localization.instance.Localize(Deconstruct_GetTooltip(__inventoryGui.m_selectedRecipe.Key.m_item.m_itemData, itemQuality)); // need to localize
 
                 if (itemData != null)
@@ -191,7 +192,7 @@ namespace ValheimPlus
 
                 // should deconstruct button be clickable
                 __inventoryGui.m_craftButton.interactable = (((playerHasRequirements && craftingStationIsValid) || __localPlayer.NoCostCheat()) && playerHasInventorySpace);
-                __inventoryGui.m_craftButton.GetComponentInChildren<Text>().text = deconstructText;
+                __inventoryGui.m_craftButton.GetComponentInChildren<TMP_Text>().text = deconstructText;
                 UITooltip component = __inventoryGui.m_craftButton.GetComponent<UITooltip>();
 
                 if (!playerHasInventorySpace)
@@ -240,7 +241,7 @@ namespace ValheimPlus
             {
                 __inventoryGui.m_craftButton.gameObject.SetActive(false);
                 __inventoryGui.m_craftProgressPanel.gameObject.SetActive(true);
-                __inventoryGui.m_craftProgressPanel.GetComponentInChildren<Text>().text = "Deconstructing...";
+                __inventoryGui.m_craftProgressPanel.GetComponentInChildren<TMP_Text>().text = "Deconstructing...";
                 __inventoryGui.m_craftProgressBar.SetMaxValue(__inventoryGui.m_craftDuration);
                 __inventoryGui.m_craftProgressBar.SetValue(__inventoryGui.m_craftTimer);
 
@@ -250,7 +251,7 @@ namespace ValheimPlus
                 Deconstruct_Deconstruct(ref __localPlayer);
 
                 __inventoryGui.m_craftTimer = -1f;
-                __inventoryGui.m_craftProgressPanel.GetComponentInChildren<Text>().text = Localization.instance.Localize("$inventory_craftingprog");
+                __inventoryGui.m_craftProgressPanel.GetComponentInChildren<TMP_Text>().text = Localization.instance.Localize("$inventory_craftingprog");
             }
         }
 
@@ -281,8 +282,8 @@ namespace ValheimPlus
             {
                 // set up resource object
                 Image resourceIcon = elementRoot.transform.Find("res_icon").GetComponent<Image>();
-                Text resourceName = elementRoot.transform.Find("res_name").GetComponent<Text>();
-                Text resourceAmount = elementRoot.transform.Find("res_amount").GetComponent<Text>();
+                TMP_Text resourceName = elementRoot.transform.Find("res_name").GetComponent<TMP_Text>();
+                TMP_Text resourceAmount = elementRoot.transform.Find("res_amount").GetComponent<TMP_Text>();
                 UITooltip resourceTooltip = elementRoot.GetComponent<UITooltip>();
 
                 // display resource object
