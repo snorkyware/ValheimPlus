@@ -3,6 +3,7 @@ using UnityEngine;
 using ValheimPlus.Configurations;
 using System.Linq;
 using TMPro;
+using System.Collections.Generic;
 
 namespace ValheimPlus.UI
 {
@@ -12,94 +13,141 @@ namespace ValheimPlus.UI
     [HarmonyPatch(typeof(HotkeyBar), nameof(HotkeyBar.UpdateIcons))]
     public static class HotkeyBar_UpdateIcons_Patch
     {
-        private const string hudObjectName = "BowAmmoCounts";
+        private const string hudObjectNamePrefix = "BowAmmoCounts";
         private const string noAmmoDisplay = "No Ammo";
+        private static int elementCount = -1;
+
+        private static bool IsEnabled()
+        {
+            return Configuration.Current.Hud.IsEnabled && Configuration.Current.Hud.displayBowAmmoCounts > 0;
+        }
+
+        private static void Prefix(ref HotkeyBar __instance, ref Player player)
+        {
+            if (!IsEnabled()) return;
+            elementCount = __instance.m_elements.Count;
+
+            // On death or player removal, also remove all the ammo counters
+            if (player == null || player.IsDead())
+            {
+                DestroyAllAmmoCounters();
+            }
+        }
 
         private static void Postfix(ref HotkeyBar __instance, ref Player player)
         {
-            if (Configuration.Current.Hud.IsEnabled && Configuration.Current.Hud.displayBowAmmoCounts > 0)
-                DisplayAmmoCountsUnderBowHotbarIcon(__instance, player);
+            if (!IsEnabled()) return;
+            if (elementCount != __instance.m_elements.Count)
+            {
+                // If the element count changed, it was completely re-made. Destroy all the ammo counters so that they get remade,
+                // otherwise the ammo counter won't be visible.
+                DestroyAllAmmoCounters();
+            }
+            DisplayAmmoCountsUnderBowHotbarIcons(__instance, player);
         }
 
-        private static void DisplayAmmoCountsUnderBowHotbarIcon(HotkeyBar __instance, Player player)
+        private static void DisplayAmmoCountsUnderBowHotbarIcons(HotkeyBar __instance, Player player)
         {
-            if (player == null) return;
+            // keep track of which slots are empty
+            HashSet<int> notSeenItemIndices = new HashSet<int>() { 0, 1, 2, 3, 4, 5, 6, 7 };
 
-            GameObject ammoCounter = GameObject.Find(hudObjectName);
-            
-            // Find the bow in the hotbar
-            ItemDrop.ItemData bow = null;
             foreach (ItemDrop.ItemData item in __instance.m_items)
             {
-                if (item.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Bow)
-                {
-                    if (bow == null || player.IsItemEquiped(item))
-                        bow = item;
-                }
+                notSeenItemIndices.Remove(item.m_gridPos.x);
+                DisplayAmmoCountsUnderBowHotbarIcon(__instance, player, item);
             }
 
-            // If there is no bow or it is not equipped, remove the text element
-            if (bow == null || (Configuration.Current.Hud.displayBowAmmoCounts == 1 && !player.IsItemEquiped(bow)))
+            // if an item was removed from a hotbar slot, we need to destroy its counter
+            foreach (int i in notSeenItemIndices) DestroyAmmoCounter(i);
+        }
+
+        private static void DisplayAmmoCountsUnderBowHotbarIcon(HotkeyBar __instance, Player player, ItemDrop.ItemData item)
+        {
+            int elementIndex = item.m_gridPos.x;
+            string hudObjectName = hudObjectNamePrefix + elementIndex;
+            GameObject ammoCounter = GameObject.Find(hudObjectName);
+
+            if (
+                // no item
+                item == null ||
+                // item is not a bow
+                item.m_shared.m_itemType != ItemDrop.ItemData.ItemType.Bow ||
+                // we only display on equipped and this bow is not equipped
+                (Configuration.Current.Hud.displayBowAmmoCounts == 1 && !player.IsItemEquiped(item)) ||
+                // invalid element index
+                elementIndex >= __instance.m_elements.Count || elementIndex < 0)
             {
-                if (ammoCounter != null)
-                {
-                    GameObject.Destroy(ammoCounter);
-                    ammoCounter = null;
-                }
+                DestroyAmmoCounter(elementIndex);
                 return;
             }
-            
-            // Make sure we have a valid index
-            if (__instance.m_elements.Count >= bow.m_gridPos.x && bow.m_gridPos.x >= 0)
+
+            // Create a new text element to display the ammo counts
+            HotkeyBar.ElementData element = __instance.m_elements[elementIndex];
+            TMP_Text ammoCounterText;
+            if (ammoCounter == null)
             {
-                // Create a new text element to display the ammo counts
-                HotkeyBar.ElementData element = __instance.m_elements[bow.m_gridPos.x];
+                var originalGameObject = element.m_amount.gameObject;
+                ammoCounter = GameObject.Instantiate(originalGameObject, originalGameObject.transform.parent, false);
+                ammoCounter.name = hudObjectName;
+                ammoCounter.SetActive(true);
+                Vector3 offset = originalGameObject.transform.position - element.m_icon.transform.position - new Vector3(0, 15);
+                ammoCounter.transform.Translate(offset);
+                ammoCounterText = ammoCounter.GetComponentInChildren<TMP_Text>();
+                ammoCounterText.fontSize -= 2;
+            }
+            else
+            {
+                ammoCounterText = ammoCounter.GetComponentInChildren<TMP_Text>();
+            }
 
-                TMP_Text ammoCounterText;
-                if (ammoCounter == null)
+            // Attach it to the hotbar icon
+            ammoCounter.gameObject.transform.SetParent(element.m_amount.gameObject.transform.parent, false);
+
+            // Find the active ammo being used for the bow
+            ItemDrop.ItemData ammoItem = player.m_ammoItem;
+            if (ammoItem == null || ammoItem.m_shared.m_ammoType != item.m_shared.m_ammoType)
+            {
+                // either no ammo is equipped, or the equipped ammo doesn't match the type required by the hotbar item.
+                ammoItem = player.GetInventory().GetAmmoItem(item.m_shared.m_ammoType);
+            }
+
+            // Calculate totals to display for current ammo type and all types
+            int currentAmmo = 0;
+            int totalAmmo = 0;
+            var inventoryItems = player.GetInventory().GetAllItems();
+            foreach (ItemDrop.ItemData inventoryItem in inventoryItems)
+            {
+                if (inventoryItem.m_shared.m_ammoType == item.m_shared.m_ammoType &&
+                    (inventoryItem.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Ammo || inventoryItem.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Consumable))
                 {
-                    ammoCounter = GameObject.Instantiate(element.m_amount.gameObject, element.m_amount.gameObject.transform.parent, false);
-                    ammoCounter.name = hudObjectName;
-                    ammoCounter.SetActive(true);
-                    Vector3 offset = element.m_amount.gameObject.transform.position - element.m_icon.transform.position - new Vector3(0, 15);
-                    ammoCounter.transform.Translate(offset);
-                    ammoCounterText = ammoCounter.GetComponentInChildren<TMP_Text>();
-                    ammoCounterText.fontSize -= 2;
-                } 
-                else
-                {
-                    ammoCounterText = ammoCounter.GetComponentInChildren<TMP_Text>();
+                    totalAmmo += inventoryItem.m_stack;
+
+                    if (inventoryItem.m_shared.m_name == ammoItem.m_shared.m_name)
+                        currentAmmo += inventoryItem.m_stack;
                 }
+            }
 
-                // Attach it to the hotbar icon
-                ammoCounter.gameObject.transform.SetParent(element.m_amount.gameObject.transform.parent, false);
+            // Change the visual display text for the UI
+            if (totalAmmo == 0)
+                ammoCounterText.text = noAmmoDisplay;
+            else
+                ammoCounterText.text = ammoItem.m_shared.m_name.Split('_').Last() + "\n" + currentAmmo + "/" + totalAmmo;
+        }
 
-                // Find the active ammo being used for thebow
-                ItemDrop.ItemData ammoItem = player.m_ammoItem;
-                if (ammoItem == null)
-                    ammoItem = player.GetInventory().GetAmmoItem(bow.m_shared.m_ammoType);
+        private static void DestroyAllAmmoCounters()
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                DestroyAmmoCounter(i);
+            }
+        }
 
-                // Calculate totals to display for current ammo type and all types
-                int currentAmmo = 0;
-                int totalAmmo = 0;
-                var inventoryItems = player.GetInventory().GetAllItems();
-                foreach (ItemDrop.ItemData inventoryItem in inventoryItems)
-                {
-                    if (inventoryItem.m_shared.m_ammoType == bow.m_shared.m_ammoType &&
-                        (inventoryItem.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Ammo || inventoryItem.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Consumable))
-                    {
-                        totalAmmo += inventoryItem.m_stack;
-
-                        if (inventoryItem.m_shared.m_name == ammoItem.m_shared.m_name)
-                            currentAmmo += inventoryItem.m_stack;
-                    }
-                }
-
-                // Change the visual display text for the UI
-                if (totalAmmo == 0)
-                    ammoCounterText.text = noAmmoDisplay;
-                else
-                    ammoCounterText.text = ammoItem.m_shared.m_name.Split('_').Last() + "\n" + currentAmmo + "/" + totalAmmo;
+        private static void DestroyAmmoCounter(int index)
+        {
+            GameObject ammoCounter = GameObject.Find(hudObjectNamePrefix + index);
+            if (ammoCounter != null)
+            {
+                GameObject.Destroy(ammoCounter);
             }
         }
     }
