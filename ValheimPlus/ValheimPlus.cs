@@ -56,7 +56,7 @@ namespace ValheimPlus
         public static string ApiRepository = "https://api.github.com/repos/grantapher/valheimPlus/releases/latest";
 
         // Website INI for auto update
-        public static string iniFile = "https://raw.githubusercontent.com/grantapher/ValheimPlus/" + fullVersion + "/valheim_plus.cfg";
+        public static string iniFile = "https://github.com/Grantapher/ValheimPlus/releases/download/" + fullVersion + "/valheim_plus.cfg";
 
         // mod fails to load when this type is correctly specified as VersionCheck, so we'll just cast it as needed instead.
         private static object versionCheck = new VersionCheck("org.bepinex.plugins.valheim_plus")
