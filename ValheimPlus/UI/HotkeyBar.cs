@@ -23,6 +23,8 @@ namespace ValheimPlus.UI
 
         private static void DisplayAmmoCountsUnderBowHotbarIcon(HotkeyBar __instance, Player player)
         {
+            if (player == null) return;
+
             GameObject ammoCounter = GameObject.Find(hudObjectName);
             
             // Find the bow in the hotbar
