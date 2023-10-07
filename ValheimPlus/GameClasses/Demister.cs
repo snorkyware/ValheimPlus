@@ -5,33 +5,30 @@ using ValheimPlus.Configurations;
 namespace ValheimPlus.GameClasses
 {
     [HarmonyPatch(typeof(Demister), "OnEnable")]
-    static class Demister_Patch
+    static class Demister_OnEnable_Patch
     {
-        static string wispLight = "demister_ball(Clone)";
-        static string wispTorch = "piece_groundtorch_mist(Clone)";
-        static string mistwalker = "Mistwalker";
+        static readonly string wispLight = "demister_ball";
+        static readonly string wispTorch = "piece_groundtorch_mist";
+        static readonly string mistwalker = "Mistwalker";
 
         static void Postfix(ref Demister __instance)
         {
             GameObject gameObject = __instance.gameObject;
-
-
-            if (gameObject.transform.root.name == wispLight && Configuration.Current.Demister.IsEnabled)
+            if (Utils.GetPrefabName(gameObject.transform.root.name) == wispLight && Configuration.Current.Demister.IsEnabled)
             {
-
-                editRange(gameObject, Configuration.Current.Demister.wispLight);
-            } 
-            else if (gameObject.transform.root.name == wispTorch && Configuration.Current.Demister.IsEnabled)
-            {
-                editRange(gameObject, Configuration.Current.Demister.wispTorch);
+                EditRange(gameObject, Configuration.Current.Demister.wispLight);
             }
-            else if (gameObject.transform.parent.name == mistwalker && Configuration.Current.Demister.IsEnabled)
+            else if (Utils.GetPrefabName(gameObject.transform.root.name) == wispTorch && Configuration.Current.Demister.IsEnabled)
             {
-                editRange(gameObject, Configuration.Current.Demister.Mistwalker);
+                EditRange(gameObject, Configuration.Current.Demister.wispTorch);
             }
-
+            else if (Utils.GetPrefabName(gameObject.transform.parent.name) == mistwalker && Configuration.Current.Demister.IsEnabled)
+            {
+                EditRange(gameObject, Configuration.Current.Demister.Mistwalker);
+            }
         }
-        static void editRange(GameObject gameObject, float range)
+
+        private static void EditRange(GameObject gameObject, float range)
         {
             gameObject.GetComponentInChildren<ParticleSystemForceField>().endRange = range;
         }
