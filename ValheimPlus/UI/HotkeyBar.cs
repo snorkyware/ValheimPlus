@@ -15,6 +15,8 @@ namespace ValheimPlus.UI
     {
         private const string hudObjectNamePrefix = "BowAmmoCounts";
         private const string noAmmoDisplay = "No Ammo";
+
+        private static readonly GameObject[] ammoCounters = new GameObject[8];
         private static int elementCount = -1;
 
         private static bool IsEnabled()
@@ -22,7 +24,7 @@ namespace ValheimPlus.UI
             return Configuration.Current.Hud.IsEnabled && Configuration.Current.Hud.displayBowAmmoCounts > 0;
         }
 
-        private static void Prefix(ref HotkeyBar __instance, ref Player player)
+        private static void Prefix(HotkeyBar __instance, Player player)
         {
             if (!IsEnabled()) return;
             elementCount = __instance.m_elements.Count;
@@ -34,7 +36,7 @@ namespace ValheimPlus.UI
             }
         }
 
-        private static void Postfix(ref HotkeyBar __instance, ref Player player)
+        private static void Postfix(HotkeyBar __instance, Player player)
         {
             if (!IsEnabled()) return;
             if (elementCount != __instance.m_elements.Count)
@@ -43,6 +45,7 @@ namespace ValheimPlus.UI
                 // otherwise the ammo counter won't be visible.
                 DestroyAllAmmoCounters();
             }
+            if (player == null || player.IsDead()) return;
             DisplayAmmoCountsUnderBowHotbarIcons(__instance, player);
         }
 
@@ -53,8 +56,11 @@ namespace ValheimPlus.UI
 
             foreach (ItemDrop.ItemData item in __instance.m_items)
             {
-                notSeenItemIndices.Remove(item.m_gridPos.x);
-                DisplayAmmoCountsUnderBowHotbarIcon(__instance, player, item);
+                if (item != null)
+                {
+                    notSeenItemIndices.Remove(item.m_gridPos.x);
+                    DisplayAmmoCountsUnderBowHotbarIcon(__instance, player, item);
+                }
             }
 
             // if an item was removed from a hotbar slot, we need to destroy its counter
@@ -64,12 +70,9 @@ namespace ValheimPlus.UI
         private static void DisplayAmmoCountsUnderBowHotbarIcon(HotkeyBar __instance, Player player, ItemDrop.ItemData item)
         {
             int elementIndex = item.m_gridPos.x;
-            string hudObjectName = hudObjectNamePrefix + elementIndex;
-            GameObject ammoCounter = GameObject.Find(hudObjectName);
+            GameObject ammoCounter = ammoCounters[elementIndex];
 
             if (
-                // no item
-                item == null ||
                 // item is not a bow
                 item.m_shared.m_itemType != ItemDrop.ItemData.ItemType.Bow ||
                 // we only display on equipped and this bow is not equipped
@@ -88,12 +91,13 @@ namespace ValheimPlus.UI
             {
                 var originalGameObject = element.m_amount.gameObject;
                 ammoCounter = GameObject.Instantiate(originalGameObject, originalGameObject.transform.parent, false);
-                ammoCounter.name = hudObjectName;
+                ammoCounter.name = hudObjectNamePrefix + elementIndex;
                 ammoCounter.SetActive(true);
                 Vector3 offset = originalGameObject.transform.position - element.m_icon.transform.position - new Vector3(0, 15);
                 ammoCounter.transform.Translate(offset);
                 ammoCounterText = ammoCounter.GetComponentInChildren<TMP_Text>();
                 ammoCounterText.fontSize -= 2;
+                ammoCounters[elementIndex] = ammoCounter;
             }
             else
             {
@@ -144,10 +148,11 @@ namespace ValheimPlus.UI
 
         private static void DestroyAmmoCounter(int index)
         {
-            GameObject ammoCounter = GameObject.Find(hudObjectNamePrefix + index);
+            GameObject ammoCounter = ammoCounters[index];
             if (ammoCounter != null)
             {
                 GameObject.Destroy(ammoCounter);
+                ammoCounters[index] = null;
             }
         }
     }
