@@ -533,7 +533,7 @@
 				"defaultType": "bool"
 			},
 			"maximumOre": {
-				"description": "Maximum amount of ore in a smelter. Must be between 1 and 250.",
+				"description": "Maximum amount of ore in a smelter.",
 				"defaultValue": "10",
 				"defaultType": "int"
 			},
@@ -585,7 +585,7 @@
 				"defaultType": "bool"
 			},
 			"maximumOre": {
-				"description": "Maximum amount of ore in a furnace. Must be between 1 and 250.",
+				"description": "Maximum amount of ore in a furnace.",
 				"defaultValue": "10",
 				"defaultType": "int"
 			},
@@ -1026,7 +1026,7 @@
 				"defaultType": "bool"
 			},
 			"maximumWood": {
-				"description": "Maximum amount of wood in a Kiln. Must be between 1 and 250.",
+				"description": "Maximum amount of wood in a Kiln.",
 				"defaultValue": "25",
 				"defaultType": "int"
 			},
@@ -1811,7 +1811,7 @@
 				"defaultValue": "false"
 			},
 			"maximumBarley": {
-				"description": "Maximum amount of barley in a windmill. Must be between 1 and 250.",
+				"description": "Maximum amount of barley in a windmill.",
 				"defaultValue": "40",
 				"defaultType": "int"
 			},
@@ -1853,7 +1853,7 @@
 				"defaultValue": "false"
 			},
 			"maximumFlax": {
-				"description": "Maximum amount of flax in a spinning wheel. Must be between 1 and 250.",
+				"description": "Maximum amount of flax in a spinning wheel.",
 				"defaultValue": "40",
 				"defaultType": "int"
 			},
