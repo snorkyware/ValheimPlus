@@ -2,7 +2,7 @@
 # run from the ValheimPlus repo root dir
 
 # Update this as necessary:
-BEPINEXPACK_VALHEIM_VERSION="5.4.2200"
+BEPINEXPACK_VALHEIM_VERSION="5.4.2202"
 
 # Constants
 TEMP_DIR="temp"
@@ -54,9 +54,6 @@ rm "$BEPINEXPACK_VALHEIM_ZIP_FILE" # todo remove
 
 # copy bepinex pack to valheim install
 cp -r "$BEPINEXPACK_VALHEIM_CONTENT_DIR/"* "$VALHEIM_INSTALL"
-
-# move dlls from unstripped corlib to managed
-cp "$VALHEIM_INSTALL/unstripped_corlib/"* "$VALHEIM_INSTALL/valheim_Data/Managed"
 
 # Download AssemblyPublicizer
 curl -Lfso "$ASSEMBLY_PUBLICIZER_ZIP_FILE" "$ASSEMBLY_PUBLICIZER_DOWNLOAD_URL"
