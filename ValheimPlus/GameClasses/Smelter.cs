@@ -60,8 +60,8 @@ namespace ValheimPlus.GameClasses
             }
             else if (__instance.m_name.Equals(SmelterDefinitions.EitrRefineryName) && Configuration.Current.EitrRefinery.IsEnabled)
             {
-                clampOre(Configuration.Current.EitrRefinery.maximumSap);
-                __instance.m_maxFuel = Configuration.Current.EitrRefinery.maximumSoftTissue;
+                clampOre(Configuration.Current.EitrRefinery.maximumSoftTissue);
+                __instance.m_maxFuel = Configuration.Current.EitrRefinery.maximumSap;
                 __instance.m_secPerProduct = Configuration.Current.EitrRefinery.productionSpeed;
             }
         }
