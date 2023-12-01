@@ -362,7 +362,7 @@ The Njord installer provided by ZeroBandwidth and team allows for you to easily 
 # What if the game updates?
 Game updates are unlikely to do more than partially break specific features of ValheimPlus at worst. 
 In case you encounter any issues, use Steam's verify integrity feature and wait for it to download/update all files.
-This should resolve any issues related. If you continue to have issues, contact the help channel in [our discord server](https://discord.gg/XamVGpgnJT).
+This should resolve any issues related. If you continue to have issues, contact the help channel in [our discord server](https://discord.gg/WU69A2JTcn).
 
 # Server Config & Version Control (About Version Enforcement)
 * If you have the Server section and enforceMod enabled in the mods config, only players with the same mod version can join your server and you can only join servers with the same mod version installed.
@@ -392,7 +392,7 @@ When hosting for other players over steam, every player will need v+ and they wi
 # Join the Discord
 We have several different channels including a showcase channel and alpha testing system, allowing players to always get the newest versions available to test out. Click the logo below to join.
 
-[![ValheimPlus Icon](https://raw.githubusercontent.com/nxPublic/ValheimPlus/master/ico.png)](https://discord.gg/XamVGpgnJT)
+[![ValheimPlus Icon](https://raw.githubusercontent.com/nxPublic/ValheimPlus/master/ico.png)](https://discord.gg/WU69A2JTcn)
 
 # Contributing to ValheimPlus
 Please see [CONTRIBUTING.md](/CONTRIBUTING.md) for details on compiling V+ for development and contributing to the project.
