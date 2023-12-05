@@ -8,6 +8,23 @@ sometimes have minor differences that require extra effort to offer compatibilit
 
 Note that alpha versions, while being compatible, have a higher likelihood of having bugs.
 
+## Valheim 0.217
+
+### Valheim 0.217.36
+* ✅ - `Valheim 0.217.36 (n-19)` + `BepInExPack_Valheim 5.4.2202` + `ValheimPlus 0.9.12.0-alpha01`
+
+### Valheim 0.217.31
+* ✅ - `Valheim 0.217.31 (n-18)` + `BepInExPack_Valheim 5.4.2202` + `ValheimPlus 0.9.11.0`
+* ✅ - `Valheim 0.217.31 (n-18)` + `BepInExPack_Valheim 5.4.2202` + `ValheimPlus 0.9.10.1-alpha02`
+* ✅ - `Valheim 0.217.31 (n-18)` + `BepInExPack_Valheim 5.4.2202` + `ValheimPlus 0.9.10.1-alpha01`
+* ✅ - `Valheim 0.217.31 (n-18)` + `BepInExPack_Valheim 5.4.2202` + `ValheimPlus 0.9.10.0`
+
+### Valheim 0.217.30
+* ✅ - `Valheim 0.217.30 (n-17)` + `BepInExPack_Valheim 5.4.2202` + `ValheimPlus 0.9.11.0`
+* ✅ - `Valheim 0.217.30 (n-17)` + `BepInExPack_Valheim 5.4.2202` + `ValheimPlus 0.9.10.1-alpha02`
+* ✅ - `Valheim 0.217.30 (n-17)` + `BepInExPack_Valheim 5.4.2202` + `ValheimPlus 0.9.10.1-alpha01`
+* ✅ - `Valheim 0.217.30 (n-17)` + `BepInExPack_Valheim 5.4.2202` + `ValheimPlus 0.9.10.0`
+
 ### Valheim 0.217.29
 * ✅ - `Valheim 0.217.29 (n-17)` + `BepInExPack_Valheim 5.4.2202` + `ValheimPlus 0.9.11.0`
 * ✅ - `Valheim 0.217.29 (n-17)` + `BepInExPack_Valheim 5.4.2202` + `ValheimPlus 0.9.10.1-alpha02`
@@ -28,7 +45,7 @@ Note that alpha versions, while being compatible, have a higher likelihood of ha
 * ✅ - `Valheim 0.217.14 (n-12)` + `BepInExPack_Valheim 5.4.2105` + `ValheimPlus 0.9.9.18-alpha01`
 * ✅ - `Valheim 0.217.14 (n-12)` + `BepInExPack_Valheim 5.4.2105` + `ValheimPlus 0.9.9.17`
 
-### Valheim 0.217 PTB
+### Valheim 0.217
 
 * ✅ - `Valheim 0.217.14 (n-12)` + `BepInExPack_Valheim 5.4.2105` + `ValheimPlus 0.9.9.17-alpha02`
 * ✅ - `Valheim 0.217.13 (n-11)` + `BepInExPack_Valheim 5.4.2105` + `ValheimPlus 0.9.9.17-alpha02`
@@ -36,10 +53,12 @@ Note that alpha versions, while being compatible, have a higher likelihood of ha
 * ✅ - `Valheim 0.217.11 (n-9)` + `BepInExPack_Valheim 5.4.2105` + `ValheimPlus 0.9.9.17-alpha02`
 * ✅ - `Valheim 0.217.7 (n-7)` + `BepInExPack_Valheim 5.4.2105` + `ValheimPlus 0.9.9.17-alpha01`
 
+## Valheim 0.216
+
 ### Valheim 0.216.9
 * ✅ - `Valheim 0.216.9 (n-5)` + `BepInExPack_Valheim 5.4.2105` + `ValheimPlus 0.9.9.16`
 
-### Valheim 0.216 PTB
+### Valheim 0.216.8 
 
 * ✅ - `Valheim ms-0.216.8` + `BepInExPack_Valheim 5.4.2105` + `ValheimPlus 0.9.9.15 (alpha7)`
 * ✅ - `Valheim 0.216.8` + `BepInExPack_Valheim 5.4.2105` + `ValheimPlus 0.9.9.15 (alpha7)`
@@ -54,6 +73,8 @@ Note that alpha versions, while being compatible, have a higher likelihood of ha
 * ✅ - `Valheim 0.216.5` + `BepInExPack_Valheim 5.4.2105` + `ValheimPlus 0.9.9.15 (alpha5)`
 * ✅ - `Valheim 0.216.5` + `BepInExPack_Valheim 5.4.2105` + `ValheimPlus 0.9.9.15 (alpha4)`
 * ⛔️ - `Valheim 0.216.5` + `BepInExPack_Valheim 5.4.2105` + `ValheimPlus 0.9.9.15`
+
+## Valheim 0.215
 
 ### Valheim 0.215.2
 

@@ -47,7 +47,7 @@ The title screen and logs will *mostly* verify that the mod is working before yo
 ### Current Version Information
 
 In the current mod release, you should have the following versions:
-* Valheim version `0.217.29 (n-17)`
+* Valheim version `0.217.31 (n-18)`
 * BepInEx version `5.4.22.0`
   * `BepInExPack_Valheim` version `5.4.2202`
     * This can be verified via logs only.
