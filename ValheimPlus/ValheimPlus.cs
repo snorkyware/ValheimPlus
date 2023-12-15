@@ -71,6 +71,7 @@ namespace ValheimPlus
         {
             Logger = base.Logger;
             Logger.LogInfo($"Valheim Plus full version: {fullVersion}");
+            Logger.LogInfo($"Valheim Plus dll file location: '{GetType().Assembly.Location}'");
             Logger.LogInfo("Trying to load the configuration file");
 
             if (ConfigurationExtra.LoadSettings() != true)
