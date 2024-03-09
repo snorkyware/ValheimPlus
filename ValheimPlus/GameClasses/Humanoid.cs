@@ -1,32 +1,30 @@
-﻿using HarmonyLib;
-using ValheimPlus.Configurations;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Linq;
+using HarmonyLib;
+using JetBrains.Annotations;
+using ValheimPlus.Configurations;
 
 namespace ValheimPlus.GameClasses
 {
-    [HarmonyPatch(typeof(Humanoid), "GetCurrentWeapon")]
+    [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.GetCurrentWeapon))]
     public static class ModifyCurrentWeapon
     {
-        private static ItemDrop.ItemData Postfix(ItemDrop.ItemData __weapon, ref Character __instance)
+        [UsedImplicitly]
+        private static void Postfix(ref ItemDrop.ItemData __result, ref Humanoid __instance)
         {
-            if (Configuration.Current.Player.IsEnabled)
+            if (__instance is not Player playerInstance
+                || !Configuration.Current.Player.IsEnabled
+                || __result?.m_shared?.m_name != "Unarmed")
             {
-                if (__weapon != null)
-                {
-                    if (__weapon.m_shared.m_name == "Unarmed")
-                    {
-                        Player CharacterPlayerInstance = (Player)__instance;
-                        __weapon.m_shared.m_damages.m_blunt = CharacterPlayerInstance.GetSkillFactor(Skills.SkillType.Unarmed) * Configuration.Current.Player.baseUnarmedDamage;
-                        if (__weapon.m_shared.m_damages.m_blunt <= 2)
-                            __weapon.m_shared.m_damages.m_blunt = 2;
-                    }
-                }
+                return;
             }
 
-            return __weapon;
+            float unarmedSkillFactor = playerInstance.GetSkillFactor(Skills.SkillType.Unarmed);
+            float newDamage = unarmedSkillFactor * Configuration.Current.Player.baseUnarmedDamage;
+            __result.m_shared.m_damages.m_blunt = Math.Max(2f, newDamage);
         }
     }
 
