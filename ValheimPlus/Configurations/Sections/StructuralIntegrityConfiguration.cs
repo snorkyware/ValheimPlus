@@ -7,6 +7,8 @@
         public float iron { get; internal set; } = 0;
         public float hardWood { get; internal set; } = 0;
         public float marble { get; internal set; } = 0;
+        public float ashstone { get; internal set; } = 0;
+        public float ancient { get; internal set; } = 0;
         public bool disableStructuralIntegrity { get; internal set; } = false;
         public bool disableDamageToPlayerStructures { get; internal set; } = false;
         public bool disableDamageToPlayerBoats { get; internal set; } = false;

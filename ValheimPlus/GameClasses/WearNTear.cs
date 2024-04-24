@@ -1,6 +1,9 @@
-﻿using HarmonyLib;
+﻿using System;
+using System.Collections.Generic;
+using HarmonyLib;
 using ValheimPlus.Configurations;
 using System.Diagnostics;
+using JetBrains.Annotations;
 
 namespace ValheimPlus.GameClasses
 {
@@ -88,109 +91,37 @@ namespace ValheimPlus.GameClasses
     /// Disable structural integrity
     /// </summary>
     [HarmonyPatch(typeof(WearNTear), nameof(WearNTear.GetMaterialProperties))]
-    public static class RemoveStructualIntegrity
+    public static class WearNTear_GetMaterialProperties_Patch
     {
-        private static bool Prefix(ref WearNTear __instance, out float maxSupport, out float minSupport, out float horizontalLoss, out float verticalLoss)
+        private static readonly Dictionary<WearNTear.MaterialType, Func<float>> Multipliers = new()
         {
-            if (Configuration.Current.StructuralIntegrity.IsEnabled && Configuration.Current.StructuralIntegrity.disableStructuralIntegrity)
+            [WearNTear.MaterialType.Wood] = () => Configuration.Current.StructuralIntegrity.wood,
+            [WearNTear.MaterialType.Stone] = () => Configuration.Current.StructuralIntegrity.stone,
+            [WearNTear.MaterialType.Iron] = () => Configuration.Current.StructuralIntegrity.iron,
+            [WearNTear.MaterialType.HardWood] = () => Configuration.Current.StructuralIntegrity.hardWood,
+            [WearNTear.MaterialType.Marble] = () => Configuration.Current.StructuralIntegrity.marble,
+            [WearNTear.MaterialType.Ashstone] = () => Configuration.Current.StructuralIntegrity.ashstone,
+            [WearNTear.MaterialType.Ancient] = () => Configuration.Current.StructuralIntegrity.ancient,
+        };
+
+        [UsedImplicitly]
+        private static void Postfix(ref WearNTear __instance, ref float horizontalLoss, ref float verticalLoss)
+        {
+            if (!Configuration.Current.StructuralIntegrity.IsEnabled) return;
+            if (Configuration.Current.StructuralIntegrity.disableStructuralIntegrity)
             {
-                maxSupport = 1500f;
-                minSupport = 20f;
                 verticalLoss = 0f;
                 horizontalLoss = 0f;
-                return false;
+                return;
             }
-            if (Configuration.Current.StructuralIntegrity.IsEnabled)
-            {
-                // This handling is choosen because we subtract from a value thats reduced by distance from ground contact.
-                Configuration.Current.StructuralIntegrity.wood = Helper.Clamp(Configuration.Current.StructuralIntegrity.wood, 0, 100);
-                Configuration.Current.StructuralIntegrity.stone = Helper.Clamp(Configuration.Current.StructuralIntegrity.stone, 0, 100);
-                Configuration.Current.StructuralIntegrity.iron = Helper.Clamp(Configuration.Current.StructuralIntegrity.iron, 0, 100);
-                Configuration.Current.StructuralIntegrity.hardWood = Helper.Clamp(Configuration.Current.StructuralIntegrity.hardWood, 0, 100);
-                Configuration.Current.StructuralIntegrity.marble = Helper.Clamp(Configuration.Current.StructuralIntegrity.marble, 0, 100);
 
-                switch (__instance.m_materialType)
-                {
-                    case WearNTear.MaterialType.Wood:
-                        maxSupport = 100f;
-                        minSupport = 10f;
-                        verticalLoss = 0.125f - ((0.125f / 100) * Configuration.Current.StructuralIntegrity.wood);
-                        horizontalLoss = 0.2f - ((0.125f / 100) * Configuration.Current.StructuralIntegrity.wood);
-                        return false;
-                    case WearNTear.MaterialType.Stone:
-                        maxSupport = 1000f;
-                        minSupport = 100f;
-                        verticalLoss = 0.125f - ((0.125f / 100) * Configuration.Current.StructuralIntegrity.stone);
-                        horizontalLoss = 1f - ((1f / 100) * Configuration.Current.StructuralIntegrity.stone);
-                        return false;
-                    case WearNTear.MaterialType.Iron:
-                        maxSupport = 1500f;
-                        minSupport = 20f;
-                        verticalLoss = 0.07692308f - ((0.07692308f / 100) * Configuration.Current.StructuralIntegrity.iron);
-                        horizontalLoss = 0.07692308f - ((0.07692308f / 100) * Configuration.Current.StructuralIntegrity.iron);
-                        return false;
-                    case WearNTear.MaterialType.HardWood:
-                        maxSupport = 140f;
-                        minSupport = 10f;
-                        verticalLoss = 0.1f - ((0.1f / 100) * Configuration.Current.StructuralIntegrity.hardWood);
-                        horizontalLoss = 0.16666667f - ((0.16666667f / 100) * Configuration.Current.StructuralIntegrity.hardWood);
-                        return false;
-                    case WearNTear.MaterialType.Marble:
-                        maxSupport = 1500f;
-                        minSupport = 100f;
-                        verticalLoss = 0.125f - ((0.125f / 100) * Configuration.Current.StructuralIntegrity.marble);
-                        horizontalLoss = 0.5f - ((0.5f / 100) * Configuration.Current.StructuralIntegrity.marble);
-                        return false;
-                    default:
-                        maxSupport = 0f;
-                        minSupport = 0f;
-                        verticalLoss = 0f;
-                        horizontalLoss = 0f;
-                        return false;
-                }
-            }
-            else
-            {
-                switch (__instance.m_materialType)
-                {
-                    case WearNTear.MaterialType.Wood:
-                        maxSupport = 100f;
-                        minSupport = 10f;
-                        verticalLoss = 0.125f;
-                        horizontalLoss = 0.2f;
-                        return false;
-                    case WearNTear.MaterialType.Stone:
-                        maxSupport = 1000f;
-                        minSupport = 100f;
-                        verticalLoss = 0.125f;
-                        horizontalLoss = 1f;
-                        return false;
-                    case WearNTear.MaterialType.Iron:
-                        maxSupport = 1500f;
-                        minSupport = 20f;
-                        verticalLoss = 0.07692308f;
-                        horizontalLoss = 0.07692308f;
-                        return false;
-                    case WearNTear.MaterialType.HardWood:
-                        maxSupport = 140f;
-                        minSupport = 10f;
-                        verticalLoss = 0.1f;
-                        horizontalLoss = 0.16666667f;
-                        return false;
-                    case WearNTear.MaterialType.Marble:
-                        maxSupport = 1500f;
-                        minSupport = 100f;
-                        verticalLoss = 0.125f;
-                        horizontalLoss = 0.5f;
-                        return false;
-                    default:
-                        maxSupport = 0f;
-                        minSupport = 0f;
-                        verticalLoss = 0f;
-                        horizontalLoss = 0f;
-                        return false;
-                }
-            }
+            // Unknown material type, don't modify.
+            if (!Multipliers.TryGetValue(__instance.m_materialType, out var multiplier)) return;
+            
+            // scale the loss number between its current number and 0 based on the user config.
+            float clampedMultiplier = Helper.Clamp(multiplier(), 0 , 100);
+            verticalLoss -= verticalLoss / 100 * clampedMultiplier;
+            horizontalLoss -= horizontalLoss / 100 * clampedMultiplier;
         }
     }
 }

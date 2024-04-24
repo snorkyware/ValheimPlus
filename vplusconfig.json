@@ -1509,6 +1509,16 @@
 				"description": "Reduce the loss of structural integrity by distance by %.",
 				"defaultValue": "0",
 				"defaultType": "float"
+			},
+			"ashstone": {
+				"description": "Reduce the loss of structural integrity by distance by %.",
+				"defaultValue": "0",
+				"defaultType": "float"
+			},
+			"ancient": {
+				"description": "Reduce the loss of structural integrity by distance by %.",
+				"defaultValue": "0",
+				"defaultType": "float"
 			}
 		}
 	},
