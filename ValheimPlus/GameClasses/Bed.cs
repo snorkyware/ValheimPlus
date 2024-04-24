@@ -48,7 +48,7 @@ namespace ValheimPlus.GameClasses
 						if (!flag)
 						{
 							Player humanPlayer = human as Player;
-							if (!EnvMan.instance.IsAfternoon() && !EnvMan.instance.IsNight())
+							if (!EnvMan.IsAfternoon() && !EnvMan.IsNight())
 							{
 								human.Message(MessageHud.MessageType.Center, "$msg_cantsleep", 0, null);
 								return;

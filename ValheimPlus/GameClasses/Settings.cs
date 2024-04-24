@@ -13,9 +13,9 @@ namespace ValheimPlus.GameClasses
         {
             foreach (var iSettingsTab in Settings.instance.SettingsTabs)
             {
-                if (iSettingsTab.GetType() == typeof(Fishlabs.Valheim.AudioSettings))
+                if (iSettingsTab.GetType() == typeof(Valheim.SettingsGui.AudioSettings))
                 {
-                    Toggle cmToggle = ((Fishlabs.Valheim.AudioSettings)iSettingsTab).m_continousMusic;
+                    Toggle cmToggle = ((Valheim.SettingsGui.AudioSettings)iSettingsTab).m_continousMusic;
                     muteAudioToggle = GameObject.Instantiate(cmToggle, cmToggle.transform.parent, false);
                     muteAudioToggle.name = "MuteGameInBackground";
                     muteAudioToggle.GetComponentInChildren<TMP_Text>().text = "Mute game in background";
