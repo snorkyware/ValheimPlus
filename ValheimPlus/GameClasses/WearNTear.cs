@@ -10,29 +10,17 @@ namespace ValheimPlus.GameClasses
     /// <summary>
     /// Disable weather damage
     /// </summary>
-    [HarmonyPatch(typeof(WearNTear), "HaveRoof")]
-    public static class RemoveWearNTear
+    [HarmonyPatch(typeof(WearNTear), "UpdateWear")]
+    public static class WearNTear_UpdateWear_Patch
     {
-        private static void Postfix(ref bool __result)
+        [UsedImplicitly]
+        private static void Prefix(float time, ref float ___m_rainTimer)
         {
             if (Configuration.Current.Building.IsEnabled && Configuration.Current.Building.noWeatherDamage)
             {
-                __result = true;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Disable weather damage under water
-    /// </summary>
-    [HarmonyPatch(typeof(WearNTear), "IsUnderWater")]
-    public static class RemoveWearNTearFromUnderWater
-    {
-        private static void Postfix(ref bool __result)
-        {
-            if (Configuration.Current.Building.IsEnabled && Configuration.Current.Building.noWeatherDamage)
-            {
-                __result = false;
+                // if the rain timer is perpetually set to the current time in prefix,
+                // then the timer will never become large enough to trigger the weather effect.
+                ___m_rainTimer = time;
             }
         }
     }
@@ -58,13 +46,19 @@ namespace ValheimPlus.GameClasses
     [HarmonyPatch(typeof(WearNTear), "ApplyDamage")]
     public static class WearNTear_ApplyDamage_Patch
     {
+        private static readonly HashSet<string> UpdateWearMethodNames = new()
+        {
+            "UpdateWear",
+            "DMD<WearNTear::UpdateWear>",
+        };
+        
         private static bool Prefix(ref WearNTear __instance, ref float damage)
         {
             // Gets the name of the method calling the ApplyDamage method
             StackTrace stackTrace = new StackTrace();
             string callingMethod = stackTrace.GetFrame(2).GetMethod().Name;
 
-            if (!(Configuration.Current.StructuralIntegrity.IsEnabled && __instance.m_piece && __instance.m_piece.IsPlacedByPlayer() && callingMethod != "UpdateWear"))
+            if (!(Configuration.Current.StructuralIntegrity.IsEnabled && __instance.m_piece && __instance.m_piece.IsPlacedByPlayer() && !UpdateWearMethodNames.Contains(callingMethod)))
                 return true;
 
             if (__instance.m_piece.m_name.StartsWith("$ship"))
