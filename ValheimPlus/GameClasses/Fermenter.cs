@@ -163,7 +163,7 @@ namespace ValheimPlus.GameClasses
         {
             if (!Configuration.Current.Fermenter.autoDeposit) return;
 
-            __instance.m_nview.InvokeRPC("Tap", new object[] { });
+            __instance.m_nview.InvokeRPC("RPC_Tap", new object[] { });
         }
 
         private static void AddItemFromNearbyChests(Fermenter __instance)
@@ -181,7 +181,7 @@ namespace ValheimPlus.GameClasses
                     {
                         if (InventoryAssistant.RemoveItemFromChest(c, item) == 0) continue;
 
-                        __instance.m_nview.InvokeRPC("AddItem", new object[] { item.m_dropPrefab.name });
+                        __instance.m_nview.InvokeRPC("RPC_AddItem", new object[] { item.m_dropPrefab.name });
                         ValheimPlusPlugin.Logger.LogInfo("Added " + item.m_shared.m_name + " to " + __instance.m_name);
                         break;
                     }

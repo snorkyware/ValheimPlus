@@ -232,7 +232,7 @@ namespace ValheimPlus.GameClasses
                 int addedFuel = InventoryAssistant.RemoveItemInAmountFromAllNearbyChests(smelter.gameObject, autoFuelRange, fuelItemData, toMaxFuel, !ignorePrivateAreaCheck);
                 for (int i = 0; i < addedFuel; i++)
                 {
-                    smelter.m_nview.InvokeRPC("AddFuel", new object[] { });
+                    smelter.m_nview.InvokeRPC("RPC_AddFuel", new object[] { });
                 }
                 if (addedFuel > 0)
                     ValheimPlusPlugin.Logger.LogInfo("Added " + addedFuel + " fuel(" + fuelItemData.m_shared.m_name + ") in " + smelter.m_name);
@@ -261,7 +261,7 @@ namespace ValheimPlus.GameClasses
 
                             for (int i = 0; i < addedOres; i++)
                             {
-                                smelter.m_nview.InvokeRPC("AddOre", new object[] { orePrefab.name });
+                                smelter.m_nview.InvokeRPC("RPC_AddOre", new object[] { orePrefab.name });
                             }
                             toMaxOre -= addedOres;
                             if (addedOres > 0)
