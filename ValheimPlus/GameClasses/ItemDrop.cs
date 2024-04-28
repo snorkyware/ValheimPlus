@@ -1,8 +1,9 @@
-﻿using HarmonyLib;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using HarmonyLib;
+using JetBrains.Annotations;
 using UnityEngine;
 using ValheimPlus.Configurations;
 
@@ -14,33 +15,29 @@ namespace ValheimPlus.GameClasses
     [HarmonyPatch(typeof(ItemDrop), nameof(ItemDrop.Awake))]
     public static class ItemDrop_Awake_Patch
     {
+        [UsedImplicitly]
         private static void Prefix(ref ItemDrop __instance)
         {
-            if (Configuration.Current.Items.IsEnabled && Configuration.Current.Items.noTeleportPrevention)
+            var config = Configuration.Current.Items;
+            if (!config.IsEnabled) return;
+
+            var sharedItemData = __instance.m_itemData.m_shared;
+            sharedItemData.m_weight =
+                Helper.applyModifierValue(sharedItemData.m_weight, config.baseItemWeightReduction);
+
+            if (config.noTeleportPrevention) sharedItemData.m_teleportable = true;
+
+            if (sharedItemData.m_maxStackSize > 1 && config.itemStackMultiplier >= 1)
             {
-                __instance.m_itemData.m_shared.m_teleportable = true;
+                sharedItemData.m_maxStackSize = 
+                    (int)Helper.applyModifierValue(sharedItemData.m_maxStackSize, config.itemStackMultiplier);
             }
 
-            if (Configuration.Current.Items.IsEnabled)
+            // Add floating property to all dropped items.
+            var gameObject = __instance.gameObject;
+            if (config.itemsFloatInWater && gameObject.GetComponent<ZNetView>() && !gameObject.GetComponent<Floating>())
             {
-
-                __instance.m_itemData.m_shared.m_weight = Helper.applyModifierValue(__instance.m_itemData.m_shared.m_weight, Configuration.Current.Items.baseItemWeightReduction);
-
-                if (__instance.m_itemData.m_shared.m_maxStackSize > 1)
-                {
-                    if (Configuration.Current.Items.itemStackMultiplier >= 1)
-                    {
-                        __instance.m_itemData.m_shared.m_maxStackSize = (int)Helper.applyModifierValue(__instance.m_itemData.m_shared.m_maxStackSize, Configuration.Current.Items.itemStackMultiplier);
-                    }
-                }
-
-                // Add floating property to all dropped items.
-                if (!__instance.gameObject.GetComponent<Floating>() && Configuration.Current.Items.itemsFloatInWater)
-                {
-                    __instance.gameObject.AddComponent<Floating>();
-                    __instance.gameObject.GetComponent<Floating>().m_waterLevelOffset = 0.5f;
-                }
-
+                gameObject.AddComponent<Floating>().m_waterLevelOffset = 0.5f;
             }
         }
     }
