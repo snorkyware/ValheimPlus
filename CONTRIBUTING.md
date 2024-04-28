@@ -14,18 +14,6 @@ How to setup the development enviroment to compile ValheimPlus yourself.
 1. Define Environment Variable `VALHEIM_INSTALL` with path to Valheim Install Directory  
    - example: `setx VALHEIM_INSTALL "C:\Program Files\Steam\steamapps\common\Valheim" /M`
 
-## Debugging with dnSpy
-
-Thanks to mono and unity-mono being open source, we patched and compiled our own mono runtime and enabled actual live debugging of the game and the mod itself with dnSpy.
-
-1. Download [dnSpy-net-win64](https://github.com/dnSpy/dnSpy/releases) and extract the exe.
-2. Load all assemblies from \<Valheim>\unstripped_corlib into dnSpy (just drag&drop the folder onto it).
-3. Load all assembly_* from \<Valheim>\valheim_Data\Managed into dnSpy (*do not load the publicized ones, they will not be loaded into the process and therefore can not be debugged*).
-4. Load ValheimPlus.dll from \<Valheim>\BepInEx\plugins into dnSpy.
-5. Copy .\libraries\Debug\mono-2.0-bdwgc.dll from this repo to \<Valheim>\MonoBleedingEdge\EmbedRuntime and overwrite the existing file.
-6. Now go to `Debug` -> `Start Debugging` and select Unity debug engine. Select your valheim.exe as the executable and hit OK.
-7. If you did set some breakpoints, the game will halt when it hits the breakpoint in memory and dnSpy will show you the objects in memory and lets you do much more useful stuff.
-
 ## V+ Conventions
 ### C#
 1. Please add all `Patch`ed methods to the file named for the type being patched. So if we patch a class type named `Humanoid`, add that patch to the `GameClasses/Humanoid.cs` file.
@@ -64,18 +52,7 @@ Thanks to mono and unity-mono being open source, we patched and compiled our own
 1. Only make a pull request for finished work. Otherwise, if we pull the work down to test it and it doesn't work, we don't know if it's because it's unfinished or if there's an unintentional bug.
    - If you'd like a review on your work before something it's finished, send us a link to a compare via Discord or make a "Draft" PR.
 1. If you want credit, add your credit to the `README.md` in your pull request if the work is more than a documentation update. We will not be able to track this ourselves and rely on you to add your preferred way of being credited.
-1. After you have made a GitHub contribution, reach out to one of the V+ devs on Discord if you'd like the "GitHub contributor" role.
-2. Make sure that if your pull requests takes care of a suggestion from our website at https://valheim.plus/todo that you also remove it from the `vplusSuggestions/todo.json`
-
-## Pull Request labels
-1. pending merge - This work has been reviewed and accepted and will be merged after the coming release
-1. pending close - This work has not been updated for a while and will be closed if no response/update is received in 2 days
-1. needs updating - This work has received feedback and needs to be updated before being accepted
-1. merge conflicts - This pr has merge conflicts that need to be resolved
-1. question - The author of the PR needs to answer a question before the PR can move forward
-1. in discussion - We want to implement the PR but have to make more preparations and tests before we can do so.
 
 ## Files
 1. valheim_plus.cfg - the file responsible for loading the configuration on game start.
-2. vplusconfig.json - the file responsible to generate the website documentation that can be found here https://valheim.plus/documentation
-3. vplusSuggestions/todo.json - the file responsible to generate the website page https://valheim.plus/todo
+2. vplusconfig.json - the file responsible to generate the website documentation (currently unused).

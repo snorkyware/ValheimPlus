@@ -45,40 +45,6 @@ namespace ValheimPlus.GameClasses
             __instance.m_versionLabel.text += "\nValheimPlus " + ValheimPlusPlugin.fullVersion + " (Grantapher Temporary)";
 
             ValheimPlusPlugin.Logger.LogInfo($"Version text: \"{__instance.m_versionLabel.text}\"".Replace("\n", ", "));
-
-            if (Configuration.Current.ValheimPlus.IsEnabled && Configuration.Current.ValheimPlus.serverBrowserAdvertisement)
-            {
-                DefaultControls.Resources uiResources = new DefaultControls.Resources();
-                GameObject joinpanel = GameObjectAssistant.GetChildComponentByName<Transform>("JoinPanel", __instance.m_startGamePanel).gameObject;
-                if (joinpanel)
-                {
-                    foreach (Transform panel in joinpanel.transform)
-                    {
-                        if (panel.gameObject.name == "Server help")
-                        {
-                            GameObject serverHelpObj = panel.gameObject;
-                            GameObject banner = GameObject.Instantiate(serverHelpObj);
-                            banner.transform.SetParent(joinpanel.transform, false);
-                            banner.transform.localPosition = banner.transform.localPosition + new Vector3(0, -300);
-                            banner.GetComponent<RectTransform>().sizeDelta = new Vector2(315, 315);
-                            banner.transform.GetChild(0).GetComponent<TMP_Text>().text = "";
-                            banner.transform.GetChild(1).gameObject.SetActive(false);
-                            GameObject bannerButton = DefaultControls.CreateButton(uiResources);
-                            bannerButton.transform.SetParent(banner.transform, false);
-                            bannerButton.GetComponentInChildren<Text>().text = "";
-                            bannerButton.GetComponent<RectTransform>().sizeDelta = new Vector2(315, 315);
-                            bannerButton.GetComponent<Button>().image.sprite = VPlusMainMenu.VPlusBannerSprite;
-                            bannerButton.GetComponent<Button>().transition = Selectable.Transition.SpriteSwap;
-                            SpriteState ss = new SpriteState();
-                            ss.highlightedSprite = VPlusMainMenu.VPlusBannerHoverSprite;
-                            bannerButton.GetComponent<Button>().spriteState = ss;
-                            bannerButton.GetComponent<Button>().onClick.AddListener(delegate { Application.OpenURL("http://zap-hosting-banner.valheim.plus"); });
-                        }
-                    }
-                }
-
-            }
-
         }
     }
 

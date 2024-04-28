@@ -478,8 +478,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets\logo.png" />
-    <EmbeddedResource Include="Assets\ZapHosting.png" />
-    <EmbeddedResource Include="Assets\ZapHosting_hover.png" />
     <Content Include="FodyWeavers.xml" />
   </ItemGroup>
   <ItemGroup />
