@@ -25,7 +25,7 @@ namespace ValheimPlus
         public const string numericVersion = "0.9.13.0";
 
         // Extra version, like alpha/beta/rc/stable. Can leave blank if a stable release.
-        public const string versionExtra = "-alpha01";
+        public const string versionExtra = "-alpha02";
 
         // Version used when numeric is NOT required (Logging, config file lookup)
         public const string fullVersion = numericVersion + versionExtra;
