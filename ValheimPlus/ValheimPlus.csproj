@@ -410,6 +410,7 @@
     <Compile Include="GameClasses\CharacterDrop.cs" />
     <Compile Include="GameClasses\Demister.cs" />
     <Compile Include="GameClasses\LuredWisp.cs" />
+    <Compile Include="GameClasses\PickableItem.cs" />
     <Compile Include="GameClasses\SEMan.cs" />
     <Compile Include="GameClasses\Talker.cs" />
     <Compile Include="GameClasses\Container.cs" />
