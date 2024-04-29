@@ -75,7 +75,7 @@ namespace ValheimPlus.GameClasses
                         AddModifiedDrops(newResultDrops, toDrop, Configuration.Current.Gathering.chitin);
                         break;
                     case "Feathers": // Feather
-                        AddModifiedDrops(newResultDrops, toDrop, Configuration.Current.Gathering.wood);
+                        AddModifiedDrops(newResultDrops, toDrop, Configuration.Current.Gathering.feather);
                         break;
 
                     default:
