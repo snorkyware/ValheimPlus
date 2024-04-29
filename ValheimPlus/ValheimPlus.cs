@@ -37,7 +37,7 @@ namespace ValheimPlus
         public static readonly GameVersion minSupportedGameVersion = new GameVersion(0, 218, 11);
 
         // The game version this version of V+ was compiled against.
-        public static readonly GameVersion targetGameVersion = new GameVersion(0, 218, 11);
+        public static readonly GameVersion targetGameVersion = new GameVersion(0, 218, 12);
 
         public static string newestVersion = "";
         public static bool isUpToDate = false;
