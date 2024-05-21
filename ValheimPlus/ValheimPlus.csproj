@@ -354,6 +354,7 @@
     <Compile Include="Configurations\Sections\HealthUsageConfiguration.cs" />
     <Compile Include="Configurations\Sections\EitrUsageConfiguration.cs" />
     <Compile Include="Configurations\Sections\GameClockConfiguration.cs" />
+    <Compile Include="Configurations\Sections\HotTubConfiguration.cs" />
     <Compile Include="Configurations\Sections\LootDropConfiguration.cs" />
     <Compile Include="Configurations\Sections\MonsterProjectileConfiguration.cs" />
     <Compile Include="Configurations\Sections\DemisterConfiguration.cs" />

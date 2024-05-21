@@ -2180,5 +2180,37 @@
 				"modifier": "true"
 			}
 		}
+	},
+	"HotTub": {
+		"description": "",
+		"icon": "fa fa-bath",
+		"description_website": "Change the in-game behavior of the hot tub and modify its values.",
+		"entries": {
+			"enabled": {
+				"description": "Change false to true to enable this section",
+				"defaultValue": "false",
+				"defaultType": "bool"
+			},
+			"infiniteFuel": {
+				"description": "If set to true, the hot tub will stay at max fuel level, without consuming any fuel.",
+				"defaultValue": "false",
+				"defaultType": "bool"
+			},
+			"autoFuel": {
+				"description": "Look for fuel inside nearby chests.",
+				"defaultValue": "false",
+				"defaultType": "bool"
+			},
+			"ignorePrivateAreaCheck": {
+				"description": "Change true to false to enable private area check when looking for chests.",
+				"defaultValue": "true",
+				"defaultType": "bool"
+			},
+			"autoRange": {
+				"description": "The range of chest detection for the auto fuel feature. (Maximum is 50)",
+				"defaultValue": "10",
+				"defaultType": "float"
+			}
+		}
 	}
 }
