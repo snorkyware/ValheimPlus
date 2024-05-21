@@ -1,9 +1,11 @@
-﻿using HarmonyLib;
+﻿using System;
+using HarmonyLib;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using JetBrains.Annotations;
 using UnityEngine;
 using ValheimPlus.Configurations;
 
@@ -59,7 +61,7 @@ namespace ValheimPlus.GameClasses
             Stopwatch delta = GameObjectAssistant.GetStopwatch(station.gameObject);
 
             int lookupInterval = Helper.Clamp(Configuration.Current.CraftFromChest.lookupInterval, 1, 10) * 1000;
-            if (!delta.IsRunning || delta.ElapsedMilliseconds > lookupInterval)
+            if (nearbyChests == null || !delta.IsRunning || delta.ElapsedMilliseconds > lookupInterval)
             {
                 nearbyChests = InventoryAssistant.GetNearbyChests(station.gameObject, Helper.Clamp(Configuration.Current.CraftFromChest.range, 1, 50), !Configuration.Current.CraftFromChest.ignorePrivateAreaCheck);
                 delta.Restart();
@@ -87,6 +89,77 @@ namespace ValheimPlus.GameClasses
                 }
             }
             return null;
+        }
+    }
+
+    public static class CookingStationFuel
+    {
+        [HarmonyPatch(typeof(CookingStation), nameof(CookingStation.Awake))]
+        public static class CookingStation_Awake_Patch
+        {
+            /// <summary>
+            /// When fire source is loaded in view, check for configurations and set its fuel to max fuel
+            /// </summary>
+            [UsedImplicitly]
+            private static void Postfix(CookingStation __instance)
+            {
+                var config = Configuration.Current.Oven;
+                if (!__instance.m_useFuel || !config.IsEnabled || !config.infiniteFuel ||
+                    __instance.m_nview?.IsValid() != true) return;
+                __instance.SetFuel(__instance.m_maxFuel);
+            }
+        }
+
+        [HarmonyPatch(typeof(CookingStation), nameof(CookingStation.UpdateFuel))]
+        public static class CookingStation_UpdateFuel_Patch
+        {
+            // If stay-at-max-fuel mode, fuel is set to max in Awake,
+            // so simply always pass a time delta of 0 so calculated fuel usage is also 0.
+            [UsedImplicitly]
+            private static void Prefix(CookingStation __instance, ref float dt)
+            {
+                var config = Configuration.Current.Oven;
+                if (!config.IsEnabled || !config.infiniteFuel) return;
+                dt = 0f;
+            }
+        }
+
+        [HarmonyPatch(typeof(CookingStation), nameof(CookingStation.UpdateCooking))]
+        public static class CookingStation_UpdateCooking_Patch
+        {
+            // If the oven isn't lit, UpdateFuel will never be called,
+            // so we prefix UpdateCooking to autoFuel if necessary.
+            [UsedImplicitly]
+            private static void Prefix(CookingStation __instance)
+            {
+                var config = Configuration.Current.Oven;
+                if (!__instance.m_useFuel || !config.IsEnabled || !config.autoFuel ||
+                    __instance.m_nview?.IsValid() != true) return;
+
+                // Only check every second:
+                var stopwatch = GameObjectAssistant.GetStopwatch(__instance.gameObject);
+                if (stopwatch.IsRunning && stopwatch.ElapsedMilliseconds < 1000) return;
+                stopwatch.Restart();
+
+                AddFuelFromNearbyChests(__instance);
+            }
+        }
+
+        private static void AddFuelFromNearbyChests(CookingStation __instance)
+        {
+            // Find the integer of fuels to take us back to exactly m_maxFuel and no further.
+            int toMaxFuel = __instance.m_maxFuel - (int)Math.Ceiling(__instance.GetFuel());
+            if (toMaxFuel < 1) return;
+
+            var fuelItemData = __instance.m_fuelItem.m_itemData;
+            int addedFuel = InventoryAssistant.RemoveItemInAmountFromAllNearbyChests(__instance.gameObject,
+                Helper.Clamp(Configuration.Current.Oven.autoRange, 1, 50), fuelItemData, toMaxFuel,
+                !Configuration.Current.Oven.ignorePrivateAreaCheck);
+            if (addedFuel < 1) return;
+
+            for (int i = 0; i < addedFuel; i++) __instance.m_nview.InvokeRPC("RPC_AddFuel");
+            ValheimPlusPlugin.Logger.LogInfo(
+                $"Added {addedFuel} fuel({fuelItemData.m_shared.m_name}) in {__instance.m_name}");
         }
     }
 }
