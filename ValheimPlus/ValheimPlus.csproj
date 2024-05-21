@@ -352,6 +352,7 @@
     <Compile Include="Configurations\Sections\ChatConfiguration.cs" />
     <Compile Include="Configurations\Sections\EitrRefineryConfiguration.cs" />
     <Compile Include="Configurations\Sections\GameClockConfiguration.cs" />
+    <Compile Include="Configurations\Sections\HotTubConfiguration.cs" />
     <Compile Include="Configurations\Sections\LootDropConfiguration.cs" />
     <Compile Include="Configurations\Sections\MonsterProjectileConfiguration.cs" />
     <Compile Include="Configurations\Sections\DemisterConfiguration.cs" />
