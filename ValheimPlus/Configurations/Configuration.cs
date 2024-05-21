@@ -56,5 +56,6 @@ namespace ValheimPlus.Configurations
         public LootDropConfiguration LootDrop { get; set; }
         public WispSpawnerConfiguration WispSpawner { get; set; }
         public DemisterConfiguration Demister { get; set; }
+        public ShieldGeneratorConfiguration ShieldGenerator { get; set; }
     }
 }
