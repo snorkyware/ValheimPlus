@@ -41,6 +41,9 @@ namespace ValheimPlus.GameClasses
                 "MushroomYellow",
                 "MushroomMagecap",
                 "MushroomJotunPuffs",
+                "MushroomSmokePuff",
+                "Fiddleheadfern",
+                "Vineberry",
                 "Onion"
             };
 
@@ -55,6 +58,7 @@ namespace ValheimPlus.GameClasses
                 "Turnip",
                 "OnionSeeds",
                 "RoyalJelly",
+                "VoltureEgg"
             };
 
             var materials = new List<string>
