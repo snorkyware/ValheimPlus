@@ -62,7 +62,8 @@ namespace ValheimPlus.GameClasses
                 "BoneFragments",
                 "Flint",
                 "Stone",
-                "Wood"
+                "Wood",
+                "Crystal",
             };
 
             var valuables = new List<string>
@@ -70,7 +71,9 @@ namespace ValheimPlus.GameClasses
                 "Amber",
                 "AmberPearl",
                 "Coins",
-                "Ruby"
+                "Ruby",
+                "WolfHairBundle",
+                "WolfClaw",
             };
 
             var surtlingCores = new List<string>
