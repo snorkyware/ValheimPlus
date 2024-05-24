@@ -355,6 +355,7 @@
     <Compile Include="Configurations\Sections\LootDropConfiguration.cs" />
     <Compile Include="Configurations\Sections\MonsterProjectileConfiguration.cs" />
     <Compile Include="Configurations\Sections\DemisterConfiguration.cs" />
+    <Compile Include="Configurations\Sections\OvenConfiguration.cs" />
     <Compile Include="Configurations\Sections\PlayerProjectileConfiguration.cs" />
     <Compile Include="Configurations\Sections\CraftFromChestConfiguration.cs" />
     <Compile Include="Configurations\Sections\FirstPersonConfiguration.cs" />
