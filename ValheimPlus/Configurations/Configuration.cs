@@ -61,5 +61,6 @@ namespace ValheimPlus.Configurations
         public HotTubConfiguration HotTub { get; set; }
         public ShieldGeneratorConfiguration ShieldGenerator { get; set; }
         public TurretConfiguration Turret { get; set; }
+        public AutoStackConfiguration AutoStack { get; set; }
     }
 }

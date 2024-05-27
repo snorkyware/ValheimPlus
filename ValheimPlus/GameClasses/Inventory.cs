@@ -2,8 +2,10 @@ using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using UnityEngine;
 using ValheimPlus.Configurations;
+using System.Linq;
 
 namespace ValheimPlus.GameClasses
 {
@@ -108,6 +110,102 @@ namespace ValheimPlus.GameClasses
         }
     }
 
+    public static class AutoStackAllStore
+    {
+        public static Inventory currentInventory = null;
+        public static int lastPlayerItemCount = 0;
+    }
+
+    [HarmonyPatch(typeof(Inventory), nameof(Inventory.StackAll))]
+    public static class Container_StackAll_Patch
+    {
+
+        /// <summary>
+        /// Start the auto stack all loop and suppress stack feedback message
+        /// </summary>
+        static void Prefix(Inventory __instance, ref bool message)
+        {
+            if (!Configuration.Current.AutoStack.IsEnabled) return;
+
+            // disable message
+            message = false;
+            if (AutoStackAllStore.currentInventory == null)
+            {
+                // enable stack recursion bypass and reset count
+                AutoStackAllStore.lastPlayerItemCount = Player.m_localPlayer.m_inventory.CountItems(null);
+                AutoStackAllStore.currentInventory = __instance;
+            }
+        }
+
+        /// <summary>
+        /// Call StackAll on all chests in range.
+        /// </summary>
+        static void Postfix(Inventory __instance, ref int __result)
+        {
+            if (!Configuration.Current.AutoStack.IsEnabled || (AutoStackAllStore.currentInventory != null && __instance != AutoStackAllStore.currentInventory)) return;
+
+            // get chests in range
+            GameObject pos = Player.m_localPlayer.gameObject;
+            List<Container> chests = InventoryAssistant.GetNearbyChests(pos, Helper.Clamp(Configuration.Current.AutoStack.autoStackAllRange, 1, 50), !Configuration.Current.AutoStack.autoStackAllIgnorePrivateAreaCheck);
+
+            // try to stack all items on found containers
+            foreach (Container container in chests)
+            {
+                if (container.m_inventory == __instance) continue;
+                container.StackAll();
+            }
+
+            // disable stack recursion bypass
+            AutoStackAllStore.currentInventory = null;
+
+            // Show stack message
+            int itemCount = AutoStackAllStore.lastPlayerItemCount - Player.m_localPlayer.m_inventory.CountItems(null);
+            if (itemCount > 0)
+            {
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "$msg_stackall " + itemCount + " in " + chests.Count + " Chests");
+            }
+            else
+            {
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "$msg_stackall_none" + " in " + chests.Count + " Chests");
+            }
+        }
 
 
+
+
+        private static MethodInfo method_Inventory_ContainsItemByName = AccessTools.Method(typeof(Inventory), nameof(Inventory.ContainsItemByName));
+        private static MethodInfo method_ContainsItemByName = AccessTools.Method(typeof(Container_StackAll_Patch), nameof(Container_StackAll_Patch.ContainsItemByName));
+
+        [HarmonyTranspiler]
+        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            if (!Configuration.Current.AutoStack.IsEnabled || !Configuration.Current.AutoStack.autoStackAllIgnoreEquipment) return instructions;
+
+            List<CodeInstruction> il = instructions.ToList();
+
+            for (int i = 0; i < il.Count; ++i)
+            {
+                if (il[i].Calls(method_Inventory_ContainsItemByName))
+                {
+                    il[i].operand = method_ContainsItemByName;
+                    break;
+                }
+            }
+
+            return il.AsEnumerable();
+        }
+
+        public static bool ContainsItemByName(Inventory inventory, string name)
+        {
+            foreach (ItemDrop.ItemData item in inventory.m_inventory)
+            {
+                if (!item.IsEquipable() && item.m_shared.m_name == name)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
 }
