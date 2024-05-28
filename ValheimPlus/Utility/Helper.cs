@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 
@@ -157,6 +158,17 @@ namespace ValheimPlus
         public static float Clamp(float value, float min, float max)
         {
             return Math.Min(max, Math.Max(min, value));
+        }
+
+        private const BindingFlags FieldBindingFlags =
+            BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public;
+
+        public static bool SetFieldIfFound(object obj, string field, object value)
+        {
+            var prop = obj.GetType().GetField(field, FieldBindingFlags);
+            if (prop == null) return false;
+            prop.SetValue(obj, value);
+            return true;
         }
     }
 }
