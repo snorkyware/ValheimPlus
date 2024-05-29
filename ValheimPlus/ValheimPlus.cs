@@ -22,7 +22,7 @@ namespace ValheimPlus
     public class ValheimPlusPlugin : BaseUnityPlugin
     {
         // Version used when numeric is required (assembly info, bepinex, System.Version parsing).
-        public const string numericVersion = "0.9.13.0";
+        public const string numericVersion = "0.9.13.1";
 
         // Extra version, like alpha/beta/rc/stable. Can leave blank if a stable release.
         public const string versionExtra = "";
@@ -38,6 +38,11 @@ namespace ValheimPlus
 
         // The game version this version of V+ was compiled against.
         public static readonly GameVersion targetGameVersion = new GameVersion(0, 218, 15);
+
+        // The last game version this will work with. If higher, the mod will not work.
+        // This is useful for warning when the game is running on a PTB version we know this will fail on.
+        // Otherwise, just keep this as null to disable the check.
+        public static readonly GameVersion maxKnownWorkingGameVersion = new GameVersion(0, 218, 11);
 
         public static string newestVersion = "";
         public static bool isUpToDate = false;
@@ -71,6 +76,10 @@ namespace ValheimPlus
         {
             Logger = base.Logger;
             Logger.LogInfo($"Valheim Plus full version: {fullVersion}");
+            
+            if (IsGameVersionTooOld()) LogTooOld();
+            else if (IsGameVersionTooNew()) LogTooNew();
+            
             Logger.LogInfo($"Valheim Plus dll file location: '{GetType().Assembly.Location}'");
             Logger.LogInfo("Trying to load the configuration file");
 
@@ -133,15 +142,12 @@ namespace ValheimPlus
             }
         }
 
-        public static bool isGameVersionTooOld()
-        {
-            return Version.CurrentVersion < minSupportedGameVersion;
-        }
+        private static bool IsGameVersionTooOld() => Version.CurrentVersion < minSupportedGameVersion;
+        private static bool IsGameVersionNewerThanTarget() => Version.CurrentVersion > targetGameVersion;
 
-        public static bool isGameVersionNewerThanTarget()
-        {
-            return Version.CurrentVersion > targetGameVersion;
-        }
+        private static bool IsGameVersionTooNew() =>
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse Want to be able to set maxKnown* to null.
+            maxKnownWorkingGameVersion != null && Version.CurrentVersion > maxKnownWorkingGameVersion;
 
         public static bool IsNewVersionAvailable()
         {
@@ -216,15 +222,12 @@ namespace ValheimPlus
                 ((VersionCheck)versionCheck).ModRequired = Configuration.Current.Server.enforceMod;
                 Logger.LogInfo("Patches successfully applied.");
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Logger.LogError($"Failed to apply patches.");
-                if (isGameVersionTooOld())
-                {
-                    Logger.LogWarning($"This version of Valheim Plus ({fullVersion}) expects a minimum game version of \"{minSupportedGameVersion}\", but this game version is older at \"{Version.CurrentVersion}\". " +
-                        $"Please either update the Valheim game, or use an older version of Valheim Plus as per https://github.com/Grantapher/ValheimPlus/blob/grantapher-development/COMPATIBILITY.md.");
-                }
-                else if (isGameVersionNewerThanTarget())
+                if (IsGameVersionTooOld()) LogTooOld();
+                else if (IsGameVersionTooNew()) LogTooNew();
+                else if (IsGameVersionNewerThanTarget())
                 {
                     Logger.LogWarning($"This version of Valheim Plus ({fullVersion}) was compiled with a game version of \"{targetGameVersion}\", but this game version is newer at \"{Version.CurrentVersion}\". " +
                         "If you are using the PTB, you likely need to use the non-beta version of the game. " +
@@ -239,8 +242,20 @@ namespace ValheimPlus
                 }
 
                 // rethrow, otherwise it may not be obvious to the user that patching failed
-                throw e;
+                throw;
             }
+        }
+
+        private static void LogTooOld()
+        {
+            Logger.LogWarning($"This version of Valheim Plus ({fullVersion}) expects a minimum game version of \"{minSupportedGameVersion}\", but this game version is older at \"{Version.CurrentVersion}\". " +
+                              "Please either update the Valheim game, or use an older version of Valheim Plus as per https://github.com/Grantapher/ValheimPlus/blob/grantapher-development/COMPATIBILITY.md.");
+        }
+        
+        private static void LogTooNew()
+        {
+            Logger.LogWarning($"This version of Valheim Plus ({fullVersion}) expects a maximum game version of \"{maxKnownWorkingGameVersion}\", but this game version is newer at \"{Version.CurrentVersion}\". " +
+                              "Please update Valheim Plus via the releases: https://github.com/Grantapher/ValheimPlus/releases");
         }
 
         public static void UnpatchSelf()
