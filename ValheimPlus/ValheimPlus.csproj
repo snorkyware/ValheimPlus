@@ -418,6 +418,7 @@
     <Compile Include="GameClasses\LuredWisp.cs" />
     <Compile Include="GameClasses\PickableItem.cs" />
     <Compile Include="GameClasses\PlayerProfile.cs" />
+    <Compile Include="GameClasses\Recipe.cs" />
     <Compile Include="GameClasses\SEMan.cs" />
     <Compile Include="GameClasses\ShieldGenerator.cs" />
     <Compile Include="GameClasses\Talker.cs" />
