@@ -56,9 +56,6 @@ namespace ValheimPlus.GameClasses
                     _ => 1f
                 };
 
-                var isCopper = drop.name == "CopperOre";
-                if (isCopper) ValheimPlusPlugin.Logger.LogWarning($"Copper mult is {dropMultiplier}");
-                
                 // ReSharper disable once CompareOfFloatsByEqualityOperator expecting exactly 1f.
                 if (dropMultiplier == 1f)
                 {
@@ -67,7 +64,6 @@ namespace ValheimPlus.GameClasses
                 }
 
                 int modifiedAmount = Helper.applyModifierValueWithChance(1f, dropMultiplier);
-                if (isCopper) ValheimPlusPlugin.Logger.LogWarning($"mod amount is {modifiedAmount}");
                 for (int i = 0; i < modifiedAmount; i++) newResultDrops.Add(drop);
             }
 
