@@ -1,35 +1,38 @@
 ﻿using System;
-using HarmonyLib;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using HarmonyLib;
 using JetBrains.Annotations;
-using UnityEngine;
 using ValheimPlus.Configurations;
+using Object = UnityEngine.Object;
 
 namespace ValheimPlus.GameClasses
 {
     [HarmonyPatch(typeof(CookingStation), nameof(CookingStation.FindCookableItem))]
     public static class CookingStation_FindCookableItem_Transpiler
     {
-        private static List<Container> nearbyChests = null;
+        private static List<Container> nearbyChests;
 
-        private static MethodInfo method_PullCookableItemFromNearbyChests = AccessTools.Method(typeof(CookingStation_FindCookableItem_Transpiler), nameof(CookingStation_FindCookableItem_Transpiler.PullCookableItemFromNearbyChests));
+        private static readonly MethodInfo Method_PullCookableItemFromNearbyChests =
+            AccessTools.Method(typeof(CookingStation_FindCookableItem_Transpiler),
+                nameof(PullCookableItemFromNearbyChests));
 
         /// <summary>
         /// Patches out the code that looks for cookable items in player inventory.
         /// When not cookables items have been found in the player inventory, check inside nearby chests.
-        /// If found, remove the item from the chests it was in, instantiate a game object and returns it so it can be placed on the CookingStation.
+        /// If found, remove the item from the chests it was in,
+        /// instantiate a game object and returns it so that it can be placed on the CookingStation.
         /// </summary>
+        [UsedImplicitly]
         [HarmonyTranspiler]
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            if (!Configuration.Current.CraftFromChest.IsEnabled || Configuration.Current.CraftFromChest.disableCookingStation) return instructions;
+            var config = Configuration.Current.CraftFromChest;
+            if (!config.IsEnabled || config.disableCookingStation) return instructions;
 
-            List<CodeInstruction> il = instructions.ToList();
-            int endIdx = -1;
+            var il = instructions.ToList();
             for (int i = 0; i < il.Count; i++)
             {
                 if (il[i].opcode == OpCodes.Ldnull)
@@ -38,56 +41,51 @@ namespace ValheimPlus.GameClasses
                     {
                         labels = il[i].labels
                     };
-                    il.Insert(++i, new CodeInstruction(OpCodes.Call, method_PullCookableItemFromNearbyChests));
+                    il.Insert(++i, new CodeInstruction(OpCodes.Call, Method_PullCookableItemFromNearbyChests));
                     il.Insert(++i, new CodeInstruction(OpCodes.Stloc_3));
                     il.Insert(++i, new CodeInstruction(OpCodes.Ldloc_3));
-                    endIdx = i;
-                    break;
+                    return il;
                 }
             }
-            if (endIdx == -1)
-            {
-                ValheimPlusPlugin.Logger.LogError("Failed to apply CookingStation_FindCookableItem_Transpiler");
-                return instructions;
-            }
 
-            return il.AsEnumerable();
+            ValheimPlusPlugin.Logger.LogError("Failed to apply CookingStation_FindCookableItem_Transpiler");
+            return il;
         }
 
         private static ItemDrop.ItemData PullCookableItemFromNearbyChests(CookingStation station)
         {
             if (station.GetFreeSlot() == -1) return null;
 
-            Stopwatch delta = GameObjectAssistant.GetStopwatch(station.gameObject);
-
+            var stopwatch = GameObjectAssistant.GetStopwatch(station.gameObject);
             int lookupInterval = Helper.Clamp(Configuration.Current.CraftFromChest.lookupInterval, 1, 10) * 1000;
-            if (nearbyChests == null || !delta.IsRunning || delta.ElapsedMilliseconds > lookupInterval)
+            if (nearbyChests == null || !stopwatch.IsRunning || stopwatch.ElapsedMilliseconds > lookupInterval)
             {
-                nearbyChests = InventoryAssistant.GetNearbyChests(station.gameObject, Helper.Clamp(Configuration.Current.CraftFromChest.range, 1, 50), !Configuration.Current.CraftFromChest.ignorePrivateAreaCheck);
-                delta.Restart();
+                nearbyChests = InventoryAssistant.GetNearbyChests(station.gameObject,
+                    Helper.Clamp(Configuration.Current.CraftFromChest.range, 1, 50),
+                    !Configuration.Current.CraftFromChest.ignorePrivateAreaCheck);
+                stopwatch.Restart();
             }
 
-            foreach (CookingStation.ItemConversion itemConversion in station.m_conversion)
+            foreach (var itemConversion in station.m_conversion)
             {
-                ItemDrop.ItemData itemData = itemConversion.m_from.m_itemData;
-
-                foreach (Container c in nearbyChests)
+                var itemData = itemConversion.m_from.m_itemData;
+                foreach (var container in nearbyChests)
                 {
-                    if (c.GetInventory().HaveItem(itemData.m_shared.m_name))
-                    {
-                        // Remove one item from chest
-                        InventoryAssistant.RemoveItemFromChest(c, itemData);
-                        // Instantiate cookabled GameObject
-                        GameObject itemPrefab = ObjectDB.instance.GetItemPrefab(itemConversion.m_from.gameObject.name);
+                    if (!container.GetInventory().HaveItem(itemData.m_shared.m_name)) continue;
 
-                        ZNetView.m_forceDisableInit = true;
-                        GameObject cookabledItem = UnityEngine.Object.Instantiate<GameObject>(itemPrefab);
-                        ZNetView.m_forceDisableInit = false;
+                    // Remove one item from chest
+                    InventoryAssistant.RemoveItemFromChest(container, itemData);
+                    // Instantiate cookabled GameObject
+                    var itemPrefab = ObjectDB.instance.GetItemPrefab(itemConversion.m_from.gameObject.name);
 
-                        return cookabledItem.GetComponent<ItemDrop>().m_itemData;
-                    }
+                    ZNetView.m_forceDisableInit = true;
+                    var cookabledItem = Object.Instantiate(itemPrefab);
+                    ZNetView.m_forceDisableInit = false;
+
+                    return cookabledItem.GetComponent<ItemDrop>().m_itemData;
                 }
             }
+
             return null;
         }
     }
