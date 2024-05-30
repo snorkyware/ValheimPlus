@@ -42,7 +42,7 @@ namespace ValheimPlus
         // The last game version this will work with. If higher, the mod will not work.
         // This is useful for warning when the game is running on a PTB version we know this will fail on.
         // Otherwise, just keep this as null to disable the check.
-        public static readonly GameVersion maxKnownWorkingGameVersion = new GameVersion(0, 218, 11);
+        public static readonly GameVersion maxKnownWorkingGameVersion = new GameVersion(0, 218, 15);
 
         public static string newestVersion = "";
         public static bool isUpToDate = false;
@@ -76,10 +76,8 @@ namespace ValheimPlus
         {
             Logger = base.Logger;
             Logger.LogInfo($"Valheim Plus full version: {fullVersion}");
-            
             if (IsGameVersionTooOld()) LogTooOld();
             else if (IsGameVersionTooNew()) LogTooNew();
-            
             Logger.LogInfo($"Valheim Plus dll file location: '{GetType().Assembly.Location}'");
             Logger.LogInfo("Trying to load the configuration file");
 
