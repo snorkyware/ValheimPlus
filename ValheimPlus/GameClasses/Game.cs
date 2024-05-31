@@ -27,37 +27,36 @@ namespace ValheimPlus.GameClasses
     }
 
     /// <summary>
-    /// Alter game difficulty damage scale
+    /// Alter game difficulty damage scale.
     /// </summary>
     [HarmonyPatch(typeof(Game), nameof(Game.GetDifficultyDamageScalePlayer))]
     public static class Game_GetDifficultyDamageScale_Patch
     {
-        private const float BaseDifficultyDamageScale = 0.04f;
-
         [UsedImplicitly]
-        private static void Postfix(ref float __result)
+        private static void Prefix(Game __instance)
         {
             var config = Configuration.Current.Game;
             if (!config.IsEnabled) return;
-            __result = ((__result - 1f) / BaseDifficultyDamageScale * config.gameDifficultyDamageScale / 100f) + 1f;
+            __instance.m_damageScalePerPlayer = config.gameDifficultyDamageScale / 100f;
         }
     }
 
-    // todo it seems that this only decreases the damage of the player, not increases enemy health.
     /// <summary>
-    /// Alter game difficulty health scale for enemies
+    /// Alter game difficulty health scale for enemies.
+    /// 
+    /// Although the underlying game code seems to just scale the damage down,
+    /// in game this results in the same damage but higher enemy health.
+    /// Not sure how that is converted in the game code, however. 
     /// </summary>
     [HarmonyPatch(typeof(Game), nameof(Game.GetDifficultyDamageScaleEnemy))]
     public static class Game_GetDifficultyHealthScale_Patch
     {
-        private const float BaseDifficultyHealthScale = 0.3f;
-
         [UsedImplicitly]
-        private static void Postfix(ref float __result)
+        private static void Prefix(Game __instance)
         {
             var config = Configuration.Current.Game;
             if (!config.IsEnabled) return;
-            __result = ((__result - 1f) / BaseDifficultyHealthScale * config.gameDifficultyHealthScale / 100f) + 1f;
+            __instance.m_healthScalePerPlayer = config.gameDifficultyHealthScale / 100f;
         }
     }
 
