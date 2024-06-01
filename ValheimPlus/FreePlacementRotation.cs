@@ -27,12 +27,19 @@ namespace ValheimPlus
             var il = instructions.ToList();
             for (int i = 0; i < il.Count; ++i)
             {
-                if (il[i].Calls(Method_Quaternion_Euler))
+                if (il[i].Calls(Method_Quaternion_Euler) && il[i + 1].opcode == OpCodes.Stloc_S)
                 {
-                    // remove direct call to Quaternion.Euler and replace with function call to switch
-                    il[i - 1] = new CodeInstruction(OpCodes.Ldarg_0);
-                    il[i] = new CodeInstruction(OpCodes.Call, Method_GetRotation);
-                    il.RemoveRange(i - 8, 7);
+                    var local = il[i + 1].operand;
+
+                    // essentially add a new line of code after the quaternion is set:
+                    // quaternion = GetRotation(this, quaternion) 
+                    il.InsertRange(index: i + 2, new CodeInstruction[]
+                    {
+                        new(OpCodes.Ldarg_0), // this
+                        new(OpCodes.Ldloc_S, local), // quaternion
+                        new(OpCodes.Call, Method_GetRotation), // GetRotation(this, quaternion)
+                        new(OpCodes.Stloc_S, local) // assign back to quaternion
+                    });
                     return il.AsEnumerable();
                 }
             }
@@ -41,12 +48,9 @@ namespace ValheimPlus
             return il.AsEnumerable();
         }
 
-        public static Quaternion GetRotation(Player __instance)
+        public static Quaternion GetRotation(Player __instance, Quaternion quaternion)
         {
-            if (ABM.isActive)
-            {
-                return Quaternion.Euler(0f, __instance.m_placeRotationDegrees * __instance.m_placeRotation, 0f);
-            }
+            if (ABM.isActive) return quaternion;
 
             var rotation = FreePlacementRotation.PlayersData.TryGetValue(__instance, out var value)
                 ? value.PlaceRotation
@@ -55,7 +59,6 @@ namespace ValheimPlus
             return Quaternion.Euler(rotation);
         }
     }
-
 
     /// <summary>
     /// Rotates placementGhost by 1 degree, if pressed key, or reset to x22.5f degrees usual rotation.
