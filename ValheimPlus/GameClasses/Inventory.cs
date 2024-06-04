@@ -109,41 +109,53 @@ namespace ValheimPlus.GameClasses
         }
     }
 
-    public static class StackAllQueueState {
-        public static Inventory _currentInventory;
-        public static List<Container> _containerQueue;
-        public static int _containerCount;
-        public static int _lastPlayerItemCount;
-        public static void DequeueContainer()
+    /// <summary>
+    /// StackAll will have one setup step when Inventory.StackAll() is called in Inventory_StackAll_Patch#Prefix.
+    /// At the end of the prefix, we start the loop of dequeuing containers that we are stacking to.
+    /// The loop will consist of:
+    ///   Dequeue containers from the queue, skipping those that are the current inventory or all already in use.
+    ///   Call StackAll on the container, which will fire off an RPC (RPC_RequestStack).
+    ///   We eventually will receive an RPC_StackResponse result. If valid it will call
+    ///     Inventory.StackAll(Inventory fromInventory, bool message) which actually does the stacking logic.
+    ///   At the end of Container.RPC_StackResponse we apply a Postfix (Container_RPC_StackResponse_Patch#Postfix)
+    ///     that will deque the next container. (now go back to the beginning of the loop)
+    /// At the end of the loop, we will display a message of what we stacked and then reset the variables. 
+    /// </summary>
+    public static class StackAllQueueState
+    {
+        private static Inventory _currentInventory;
+        private static int _lastPlayerItemCount;
+        private static Queue<Container> _containerQueue;
+        private static int _containerCount;
+
+        public static bool isActive => _currentInventory != null;
+
+        public static void Setup(Inventory fromInventory, List<Container> targetContainers)
         {
-            // finish up if all chests done.
-            if (_containerQueue.Count <= 0)
-            {
-                FinishStacking();
-                return;
-            }
-            // pop from queue
-            var container = _containerQueue.First();
-            _containerQueue.RemoveAt(0);
-
-            // check for active inventory or in use before calling RPC and skip
-            if (container.m_inventory == _currentInventory || container.IsInUse())
-            {
-                DequeueContainer();
-                return;
-            }
-
-            // call StackAll on container
-            container.StackAll();
+            _currentInventory = fromInventory;
+            _lastPlayerItemCount = fromInventory.CountItems(null);
+            _containerQueue = new Queue<Container>(targetContainers);
+            _containerCount = targetContainers.Count;
         }
 
-        public static void FinishStacking()
+        /// <summary>
+        /// Call StackAll on the next valid container.
+        /// </summary>
+        public static void StackAllNextContainer()
         {
-            if (_containerQueue.Count > 0)
+            while (_containerQueue.Count > 0)
             {
-                return;
+                var container = _containerQueue.Dequeue();
+                if (container.m_inventory == _currentInventory || container.IsInUse()) continue;
+                container.StackAll();
+                break;
             }
 
+            if (_containerQueue.Count == 0) FinishStacking();
+        }
+
+        private static void FinishStacking()
+        {
             // Show stack message
             int itemCount = _lastPlayerItemCount - Player.m_localPlayer.m_inventory.CountItems(null);
             string message = itemCount > 0
@@ -160,40 +172,44 @@ namespace ValheimPlus.GameClasses
     [HarmonyPatch(typeof(Inventory), nameof(Inventory.StackAll))]
     public static class Inventory_StackAll_Patch
     {
-        
-
         /// <summary>
         /// Start the auto stack all loop and suppress stack feedback message
         /// </summary>
         [UsedImplicitly]
-        private static void Prefix(Inventory __instance, ref bool message)
+        private static void Prefix(Inventory __instance, Inventory fromInventory, ref bool message)
         {
-            if (!Configuration.Current.AutoStack.IsEnabled) return;
+            var config = Configuration.Current.AutoStack;
+            if (!config.IsEnabled) return;
 
             // disable message
             message = false;
-            if (StackAllQueueState._currentInventory != null) return;
 
-            // enable stack recursion bypass and reset count
-            StackAllQueueState._lastPlayerItemCount = Player.m_localPlayer.m_inventory.CountItems(null);
-            StackAllQueueState._currentInventory = __instance;
+            // This method will be called every time we stack all to a different container,
+            // so if we are already AutoStacking, then don't begin another AutoStacking.
+            if (StackAllQueueState.isActive) return;
 
             // get chests in range
-            var gameObj = Player.m_localPlayer.gameObject;
-            StackAllQueueState._containerQueue = InventoryAssistant.GetNearbyChests(gameObj,
-                Helper.Clamp(Configuration.Current.AutoStack.autoStackAllRange, 1, 50),
-                !Configuration.Current.AutoStack.autoStackAllIgnorePrivateAreaCheck);
-            StackAllQueueState._containerCount = StackAllQueueState._containerQueue.Count;
+            var nearbyChests = InventoryAssistant.GetNearbyChests(Player.m_localPlayer.gameObject,
+                Helper.Clamp(config.autoStackAllRange, 1, 50),
+                !config.autoStackAllIgnorePrivateAreaCheck);
 
-            StackAllQueueState.DequeueContainer();
+            StackAllQueueState.Setup(fromInventory: __instance, targetContainers: nearbyChests);
+
+            // start the StackAll loop
+            StackAllQueueState.StackAllNextContainer();
         }
 
         private static readonly MethodInfo Method_Inventory_ContainsItemByName =
             AccessTools.Method(typeof(Inventory), nameof(Inventory.ContainsItemByName));
 
-        private static readonly MethodInfo Method_ContainsItemByName = 
+        private static readonly MethodInfo Method_ContainsItemByName =
             AccessTools.Method(typeof(Inventory_StackAll_Patch), nameof(ContainsItemByName));
 
+        /// <summary>
+        /// Replaces the game's Inventory.ContainsItemByName call with our own.
+        /// Their method only checks for a match by name, where ours has an additional check for whether
+        /// the item is equip-able.
+        /// </summary>
         [UsedImplicitly]
         [HarmonyTranspiler]
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
