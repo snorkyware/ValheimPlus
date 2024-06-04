@@ -78,12 +78,22 @@ namespace ValheimPlus
         private void Awake()
         {
             Logger = base.Logger;
+            Logger.LogInfo($"Valheim game version: {Version.GetVersionString()} (n-{Version.m_networkVersion})");
             Logger.LogInfo($"Valheim Plus full version: {fullVersion}");
-
-            if (IsGameVersionTooOld()) LogTooOld();
-            else if (IsGameVersionTooNew()) LogTooNew();
-
             Logger.LogInfo($"Valheim Plus dll file location: '{GetType().Assembly.Location}'");
+
+            var tooOld = IsGameVersionTooOld();
+            if (tooOld) LogTooOld();
+
+            var tooNew = IsGameVersionTooNew();
+            if (tooNew) LogTooNew();
+
+            if (tooOld || tooNew)
+            {
+                Logger.LogFatal("Aborting loading of Valheim Plus due to incompatible version.");
+                return;
+            }
+
             Logger.LogInfo("Trying to load the configuration file");
 
             if (ConfigurationExtra.LoadSettings() != true)
@@ -246,7 +256,7 @@ namespace ValheimPlus
 
         private static void LogTooOld()
         {
-            Logger.LogWarning(
+            Logger.LogError(
                 $"This version of Valheim Plus ({fullVersion}) expects a minimum game version of " +
                 $"\"{MinSupportedGameVersion}\", but this game version is older at \"{Version.CurrentVersion}\". " +
                 "Please either update the Valheim game, or use an older version of Valheim Plus as per " +
@@ -255,7 +265,7 @@ namespace ValheimPlus
 
         private static void LogTooNew()
         {
-            Logger.LogWarning(
+            Logger.LogError(
                 $"This version of Valheim Plus ({fullVersion}) expects a maximum game version of " +
                 $"\"{MaxKnownWorkingGameVersion}\", but this game version is newer at \"{Version.CurrentVersion}\". " +
                 "Please update Valheim Plus via the releases: https://github.com/Grantapher/ValheimPlus/releases");
