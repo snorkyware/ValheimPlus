@@ -132,10 +132,12 @@ namespace ValheimPlus.GameClasses
 
         public static void Setup(Inventory fromInventory, List<Container> targetContainers)
         {
+            if (isActive) return;
+            
             _currentInventory = fromInventory;
-            _lastPlayerItemCount = fromInventory.CountItems(null);
+            _lastPlayerItemCount = _currentInventory.CountItems(null);
             _containerQueue = new Queue<Container>(targetContainers);
-            _containerCount = targetContainers.Count;
+            _containerCount = _containerQueue.Count;
         }
 
         /// <summary>
@@ -143,6 +145,8 @@ namespace ValheimPlus.GameClasses
         /// </summary>
         public static void StackAllNextContainer()
         {
+            if (!isActive) return;
+
             while (_containerQueue.Count > 0)
             {
                 var container = _containerQueue.Dequeue();
@@ -156,8 +160,10 @@ namespace ValheimPlus.GameClasses
 
         private static void FinishStacking()
         {
+            if (!isActive) return;
+            
             // Show stack message
-            int itemCount = _lastPlayerItemCount - Player.m_localPlayer.m_inventory.CountItems(null);
+            int itemCount = _lastPlayerItemCount - _currentInventory.CountItems(null);
             string message = itemCount > 0
                 ? $"$msg_stackall {itemCount} in {_containerCount} Chests"
                 : $"$msg_stackall_none in {_containerCount} Chests";
@@ -176,7 +182,7 @@ namespace ValheimPlus.GameClasses
         /// Start the auto stack all loop and suppress stack feedback message
         /// </summary>
         [UsedImplicitly]
-        private static void Prefix(Inventory __instance, Inventory fromInventory, ref bool message)
+        private static void Prefix(Inventory fromInventory, ref bool message)
         {
             var config = Configuration.Current.AutoStack;
             if (!config.IsEnabled) return;
@@ -193,7 +199,7 @@ namespace ValheimPlus.GameClasses
                 Helper.Clamp(config.autoStackAllRange, 1, 50),
                 !config.autoStackAllIgnorePrivateAreaCheck);
 
-            StackAllQueueState.Setup(fromInventory: __instance, targetContainers: nearbyChests);
+            StackAllQueueState.Setup(fromInventory: fromInventory, targetContainers: nearbyChests);
 
             // start the StackAll loop
             StackAllQueueState.StackAllNextContainer();
