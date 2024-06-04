@@ -78,7 +78,7 @@ namespace ValheimPlus
         private void Awake()
         {
             Logger = base.Logger;
-            Logger.LogInfo($"Valheim game version: {Version.GetVersionString()} (n-{Version.m_networkVersion})");
+            Logger.LogInfo($"Valheim game version: {Version.GetVersionString()}");
             Logger.LogInfo($"Valheim Plus full version: {fullVersion}");
             Logger.LogInfo($"Valheim Plus dll file location: '{GetType().Assembly.Location}'");
 
