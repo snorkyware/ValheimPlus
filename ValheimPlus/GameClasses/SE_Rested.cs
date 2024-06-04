@@ -1,77 +1,52 @@
-﻿using HarmonyLib;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Reflection.Emit;
+using HarmonyLib;
+using JetBrains.Annotations;
 using UnityEngine;
 using ValheimPlus.Configurations;
-using HarmonyLib.Tools;
-using MonoMod.Utils;
 
-namespace ValheimPlus
+namespace ValheimPlus.GameClasses
 {
     [HarmonyPatch(typeof(SE_Rested), nameof(SE_Rested.UpdateTTL))]
-    public static class SE_Rested_UpdateTTL_Patch
+    public static class Se_Rested_UpdateTtl_Patch
     {
         /// <summary>
         /// Updates the time per rested comfort level.
         /// </summary>
-        [HarmonyPrefix]
-        public static void Prefix(ref float ___m_TTLPerComfortLevel)
+        [UsedImplicitly]
+        public static void Prefix(SE_Rested __instance)
         {
-            if (Configuration.Current.Player.IsEnabled)
-            {
-                ___m_TTLPerComfortLevel = Configuration.Current.Player.restSecondsPerComfortLevel;
-            }
+            var config = Configuration.Current.Player;
+            if (!config.IsEnabled) return;
+            __instance.m_TTLPerComfortLevel = config.restSecondsPerComfortLevel;
         }
-    }
-
-
-    /// <summary>
-    /// Changes the radius in which pieces contribute to the rested bonus.
-    /// </summary>
-    [HarmonyPatch(typeof(SE_Rested), nameof(SE_Rested.GetNearbyComfortPieces))]
-    public static class SE_Rested_GetNearbyPieces_Transpiler
-    {
-        [HarmonyTranspiler]
-        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-        {
-            if (!Configuration.Current.Building.IsEnabled || Configuration.Current.Building.pieceComfortRadius == 10) return instructions;
-
-            List<CodeInstruction> il = instructions.ToList();
-
-            for (int i = 0; i < il.Count; ++i)
-            {
-                if (il[i].opcode == OpCodes.Ldc_R4)
-                    il[i].operand = Mathf.Clamp(Configuration.Current.Building.pieceComfortRadius, 1, 300);
-            }
-
-            return il.AsEnumerable();
-        }
-
     }
 
     /// <summary>
     /// Changes the radius in which pieces contribute to the rested bonus.
     /// </summary>
     [HarmonyPatch(typeof(SE_Rested), nameof(SE_Rested.GetNearbyComfortPieces))]
-    public static class SE_Rested_GetNearbyComfortPieces_Transpiler
+    public static class Se_Rested_GetNearbyComfortPieces_Transpiler
     {
-        [HarmonyTranspiler]
+        [UsedImplicitly]
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            if (!Configuration.Current.Building.IsEnabled || Configuration.Current.Building.pieceComfortRadius == 10) return instructions;
+            var config = Configuration.Current.Building;
+            // ReSharper disable once CompareOfFloatsByEqualityOperator expecting exact constant
+            if (!config.IsEnabled || config.pieceComfortRadius == 10f) return instructions;
 
-            List<CodeInstruction> il = instructions.ToList();
-
+            var il = instructions.ToList();
             for (int i = 0; i < il.Count; ++i)
             {
-                if (il[i].opcode == OpCodes.Ldc_R4)
-                    il[i].operand = Mathf.Clamp(Configuration.Current.Building.pieceComfortRadius, 1, 300);
+                if (il[i].opcode != OpCodes.Ldc_R4) continue;
+                il[i].operand = Mathf.Clamp(config.pieceComfortRadius, 1f, 300f);
+                return il;
             }
-            return il.AsEnumerable();
+
+            ValheimPlusPlugin.Logger.LogError(
+                "Couldn't transpile `SE_Rested.GetNearbyComfortPieces` for `Building.pieceComfortRadius` config!");
+            return il;
         }
-
     }
-
 }
