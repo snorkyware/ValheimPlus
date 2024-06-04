@@ -63,12 +63,9 @@ namespace ValheimPlus
             return (float)result;
         }
 
-        public static float applyModifierValue(float targetValue, float value) {
-            if (value <= -100)
-                return 0f;
-
-            return targetValue + (targetValue / 100.0f * value);
-        }
+        // ReSharper disable once InconsistentNaming
+        public static float applyModifierValue(float targetValue, float value) =>
+            value <= -100f ? 0f : targetValue + (targetValue / 100.0f * value);
 
         /// <summary>
         /// Calculate new value with chance mechanics.<br/><br/>

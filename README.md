@@ -96,12 +96,14 @@ A HarmonyX Mod aimed at improving the gameplay quality of Valheim. The mod inclu
 - Set the difficulty calculation to a specific player count.
 
 ### Turret
-- Change the values and behavior of the ingame balista / turret.
-  - The balista can ignore players
-  - The balista can have infinite ammo
-  - the balista can shoot faster
-  - the balista can turn faster
-  - the balista can see targets further away
+- Change the values and behavior of the in-game ballista / turret.
+  - The ballista can ignore players
+  - The ballista can have infinite ammo
+  - The ballista can shoot faster
+  - The ballista can turn faster
+  - The ballista can see targets further away
+  - The ballista can shoot faster projectiles
+  - The ballista can shoot more accurately
 
 ## Inventory
 

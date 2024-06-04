@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace ValheimPlus.Configurations.Sections
+﻿namespace ValheimPlus.Configurations.Sections
 {
     public class TurretConfiguration : ServerSyncConfig<TurretConfiguration>
     {
@@ -12,5 +7,7 @@ namespace ValheimPlus.Configurations.Sections
         public float turnRate { get; internal set; } = 0;
         public float attackCooldown { get; internal set; } = 0;
         public float viewDistance { get; internal set; } = 0;
+        public float projectileVelocity { get; internal set; } = 0f;
+        public float projectileAccuracy { get; internal set; } = 0f;
     }
 }

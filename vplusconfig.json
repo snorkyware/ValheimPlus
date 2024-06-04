@@ -1163,11 +1163,6 @@
 				"defaultValue": "false",
 				"defaultType": "bool"
 			},
-			"disableCameraShake": {
-				"description": "Disable all types of camera shake",
-				"defaultValue": "false",
-				"defaultType": "bool"
-			},
 			"baseUnarmedDamage": {
 				"description": "The base unarmed damage multiplied by your skill level. 120 will result in a maximum of up to 12 damage when you have a skill level of 10.",
 				"defaultValue": "70",
@@ -2277,6 +2272,16 @@
 			},
 			"viewDistance": {
 				"description": "This value changes the view distance of balista. The value 50 would increase the view distance by 50%.",
+				"defaultValue": "0",
+				"defaultType": "float"
+			},
+			"projectileVelocity": {
+				"description": "This value determines the velocity of the projectiles a ballista fires. A multiplier of 50 will result in the projectile velocity being 50% faster.",
+				"defaultValue": "0",
+				"defaultType": "float"
+			},
+			"projectileAccuracy": {
+				"description": "This value determines the accuracy of the projectiles a ballista fires. A multiplier of 50 will result in the projectile being 50% more accurate.",
 				"defaultValue": "0",
 				"defaultType": "float"
 			}
