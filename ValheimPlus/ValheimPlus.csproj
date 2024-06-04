@@ -413,6 +413,7 @@
     <Compile Include="GameClasses\Character.cs" />
     <Compile Include="GameClasses\CharacterDrop.cs" />
     <Compile Include="GameClasses\Demister.cs" />
+    <Compile Include="GameClasses\InventoryGrid.cs" />
     <Compile Include="GameClasses\LuredWisp.cs" />
     <Compile Include="GameClasses\PickableItem.cs" />
     <Compile Include="GameClasses\PlayerProfile.cs" />
