@@ -2,7 +2,9 @@
 {
     public class TimeConfiguration : ServerSyncConfig<TimeConfiguration>
     {
-        public float totalDayTimeInSeconds { get; internal set; } = 1200;
-        public float nightTimeSpeedMultiplier { get; internal set; } = 0;
+        public bool forcePartOfDay { get; internal set; } = false;
+        public float forcePartOfDayTime { get; internal set; } = 0.5f;
+        public float totalDayTimeInSeconds { get; internal set; } = 1800f;
+        public float nightPercent { get; internal set; } = 30f;
     }
 }
