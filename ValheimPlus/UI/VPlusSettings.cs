@@ -228,7 +228,7 @@ namespace ValheimPlus.UI
                 okButton.onClick.AddListener(delegate {
                     Apply();
                     modSettingsPanel.SetActive(false);
-                    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                    SceneManager.LoadScene(SceneManager.GetActiveScene().name);
                 });
                 applyButton.gameObject.SetActive(false);
             }
