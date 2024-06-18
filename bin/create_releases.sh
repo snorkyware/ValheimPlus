@@ -5,7 +5,7 @@
 BEPINEXPACK_VALHEIM_VERSION="5.4.2202"
 
 # Constants:
-NUMERIC_VERSION=$(grep "public const string numericVersion" ValheimPlus/ValheimPlus.cs | cut -f2 -d'"')
+NUMERIC_VERSION=$(grep "public const string NumericVersion" ValheimPlus/ValheimPlus.cs | cut -f2 -d'"')
 VERSION_EXTRA=$(grep "private const string VersionExtra" ValheimPlus/ValheimPlus.cs | cut -f2 -d'"')
 VERSION="${NUMERIC_VERSION}${VERSION_EXTRA}"
 OUTPUT_DIR=$(realpath "release/$VERSION")
