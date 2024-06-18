@@ -18,20 +18,23 @@ namespace ValheimPlus
     // COPYRIGHT 2021 KEVIN "nx#8830" J. // http://n-x.xyz
     // GITHUB REPOSITORY https://github.com/valheimPlus/ValheimPlus
 
-    [BepInPlugin("org.bepinex.plugins.valheim_plus", "Valheim Plus", numericVersion)]
+    [BepInPlugin(ValheimPlusGuid, ValheimPlusName, NumericVersion)]
     public class ValheimPlusPlugin : BaseUnityPlugin
     {
+        private const string ValheimPlusGuid = "org.bepinex.plugins.valheim_plus";
+        private const string ValheimPlusName = "Valheim Plus";
+
         // Version used when numeric is required (assembly info, bepinex, System.Version parsing).
-        public const string numericVersion = "0.9.14.0";
+        public const string NumericVersion = "0.9.14.0";
 
         // Extra version, like alpha/beta/rc/stable. Can leave blank if a stable release.
         private const string VersionExtra = "-alpha03";
 
         // Version used when numeric is NOT required (Logging, config file lookup)
-        public const string fullVersion = numericVersion + VersionExtra;
+        public const string FullVersion = NumericVersion + VersionExtra;
 
         // Minimum required version for full compatibility.
-        private const string MinRequiredNumericVersion = numericVersion;
+        private const string MinRequiredNumericVersion = NumericVersion;
 
         // The lowest game version this version of V+ is known to work with.
         private static readonly GameVersion MinSupportedGameVersion = new(0, 218, 16);
@@ -58,19 +61,19 @@ namespace ValheimPlus
         private static readonly Harmony Harmony = new("mod.valheim_plus");
 
         // Project Repository Info
-        public const string repository = "https://github.com/Grantapher/ValheimPlus/releases/latest";
+        public const string Repository = "https://github.com/Grantapher/ValheimPlus/releases/latest";
         private const string ApiRepository = "https://api.github.com/repos/grantapher/valheimPlus/releases/latest";
 
         // Website INI for auto update
         internal static readonly string IniFile =
-            $"https://github.com/Grantapher/ValheimPlus/releases/download/{fullVersion}/valheim_plus.cfg";
+            $"https://github.com/Grantapher/ValheimPlus/releases/download/{FullVersion}/valheim_plus.cfg";
 
         // mod fails to load when this type is correctly specified as VersionCheck,
         // so we'll just cast it as needed instead.
-        private static readonly object VersionCheck = new VersionCheck("org.bepinex.plugins.valheim_plus")
+        private static readonly object VersionCheck = new VersionCheck(ValheimPlusGuid)
         {
             DisplayName = "Valheim Plus",
-            CurrentVersion = numericVersion,
+            CurrentVersion = NumericVersion,
             MinimumRequiredVersion = MinRequiredNumericVersion,
         };
 
@@ -79,7 +82,7 @@ namespace ValheimPlus
         {
             Logger = base.Logger;
             Logger.LogInfo($"Valheim game version: {Version.GetVersionString()}");
-            Logger.LogInfo($"Valheim Plus full version: {fullVersion}");
+            Logger.LogInfo($"Valheim Plus full version: {FullVersion}");
             Logger.LogInfo($"Valheim Plus dll file location: '{GetType().Assembly.Location}'");
 
             var tooOld = IsGameVersionTooOld();
@@ -110,11 +113,11 @@ namespace ValheimPlus
                 isUpToDate = !IsNewVersionAvailable();
                 if (!isUpToDate)
                 {
-                    Logger.LogWarning($"There is a newer version available of ValheimPlus. Please visit {repository}.");
+                    Logger.LogWarning($"There is a newer version available of ValheimPlus. Please visit {Repository}.");
                 }
                 else
                 {
-                    Logger.LogInfo($"ValheimPlus [{fullVersion}] is up to date.");
+                    Logger.LogInfo($"ValheimPlus [{FullVersion}] is up to date.");
                 }
 
                 // Create VPlus dir if it does not exist.
@@ -168,7 +171,7 @@ namespace ValheimPlus
             //Parse versions for proper version check
             if (System.Version.TryParse(newestVersion, out var newVersion))
             {
-                if (System.Version.TryParse(numericVersion, out var currentVersion))
+                if (System.Version.TryParse(NumericVersion, out var currentVersion))
                 {
                     if (currentVersion < newVersion)
                     {
@@ -183,7 +186,7 @@ namespace ValheimPlus
             else //Fallback version check if the version parsing fails
             {
                 Logger.LogWarning("Couldn't parse newest version, comparing version strings with equality.");
-                if (newestVersion != numericVersion)
+                if (newestVersion != NumericVersion)
                 {
                     return true;
                 }
@@ -231,7 +234,7 @@ namespace ValheimPlus
                 else if (IsGameVersionNewerThanTarget())
                 {
                     Logger.LogWarning(
-                        $"This version of Valheim Plus ({fullVersion}) was compiled with a game version of " +
+                        $"This version of Valheim Plus ({FullVersion}) was compiled with a game version of " +
                         $"\"{TargetGameVersion}\", but this game version is newer at \"{Version.CurrentVersion}\". " +
                         "If you are using the PTB, you likely need to use the non-beta version of the game. " +
                         "Otherwise, the errors seen above likely will require the Valheim Plus mod to be updated. " +
@@ -244,7 +247,7 @@ namespace ValheimPlus
                     Logger.LogWarning(
                         $"Valheim Plus failed to apply patches. " +
                         $"Please ensure the game version ({Version.GetVersionString()}) is compatible with " +
-                        $"the Valheim Plus version ({fullVersion}) at " +
+                        $"the Valheim Plus version ({FullVersion}) at " +
                         "https://github.com/Grantapher/ValheimPlus/blob/grantapher-development/COMPATIBILITY.md. " +
                         "If it already is, please report a bug at https://github.com/Grantapher/ValheimPlus/issues.");
                 }
@@ -257,7 +260,7 @@ namespace ValheimPlus
         private static void LogTooOld()
         {
             Logger.LogError(
-                $"This version of Valheim Plus ({fullVersion}) expects a minimum game version of " +
+                $"This version of Valheim Plus ({FullVersion}) expects a minimum game version of " +
                 $"\"{MinSupportedGameVersion}\", but this game version is older at \"{Version.CurrentVersion}\". " +
                 "Please either update the Valheim game, or use an older version of Valheim Plus as per " +
                 "https://github.com/Grantapher/ValheimPlus/blob/grantapher-development/COMPATIBILITY.md.");
@@ -266,7 +269,7 @@ namespace ValheimPlus
         private static void LogTooNew()
         {
             Logger.LogError(
-                $"This version of Valheim Plus ({fullVersion}) expects a maximum game version of " +
+                $"This version of Valheim Plus ({FullVersion}) expects a maximum game version of " +
                 $"\"{MaxKnownWorkingGameVersion}\", but this game version is newer at \"{Version.CurrentVersion}\". " +
                 "Please update Valheim Plus via the releases: https://github.com/Grantapher/ValheimPlus/releases");
         }
