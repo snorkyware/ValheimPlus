@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -42,10 +43,16 @@ namespace ValheimPlus
         // The game version this version of V+ was compiled against.
         private static readonly GameVersion TargetGameVersion = new(0, 218, 15);
 
-        // The last game version this will work with. If higher, the mod will not work.
-        // This is useful for warning when the game is running on a PTB version we know this will fail on.
-        // Otherwise, just keep this as null to disable the check.
-        private static readonly GameVersion MaxKnownWorkingGameVersion = new(0, 218, 15);
+        // Versions we know for sure will not work with this game version.
+        // Useful if a PTB is active to exclude it from the stable release.
+        private static readonly Dictionary<GameVersion, string> ExcludeGameVersions = new()
+        {
+            [new GameVersion(0, 218, 17)] =
+                $"This version of Valheim Plus ({FullVersion}) does not work with the current Valheim game version " +
+                $"({Version.CurrentVersion}), to use this Valheim game version, update Valheim Plus (possibly to an" +
+                " alpha version): https://github.com/Grantapher/ValheimPlus/releases. If you don't want to use an " +
+                "alpha version, update the Valheim game version to one compatible with this one."
+        };
 
         internal static string newestVersion { get; private set; } = "";
         internal static bool isUpToDate { get; private set; }
@@ -88,10 +95,9 @@ namespace ValheimPlus
             var tooOld = IsGameVersionTooOld();
             if (tooOld) LogTooOld();
 
-            var tooNew = IsGameVersionTooNew();
-            if (tooNew) LogTooNew();
+            var versionExcluded = CheckIsGameVersionExcluded();
 
-            if (tooOld || tooNew)
+            if (tooOld || versionExcluded)
             {
                 Logger.LogFatal("Aborting loading of Valheim Plus due to incompatible version.");
                 return;
@@ -146,9 +152,12 @@ namespace ValheimPlus
         private static bool IsGameVersionTooOld() => Version.CurrentVersion < MinSupportedGameVersion;
         private static bool IsGameVersionNewerThanTarget() => Version.CurrentVersion > TargetGameVersion;
 
-        private static bool IsGameVersionTooNew() =>
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse Want to be able to set maxKnown* to null.
-            MaxKnownWorkingGameVersion != null && Version.CurrentVersion > MaxKnownWorkingGameVersion;
+        private static bool CheckIsGameVersionExcluded()
+        {
+            bool excluded = ExcludeGameVersions.TryGetValue(Version.CurrentVersion, out var errorMessage);
+            if (excluded) Logger.LogError(errorMessage);
+            return excluded;
+        }
 
         private static bool IsNewVersionAvailable()
         {
@@ -228,9 +237,8 @@ namespace ValheimPlus
             }
             catch (Exception)
             {
-                Logger.LogError($"Failed to apply patches.");
+                Logger.LogError("Failed to apply patches.");
                 if (IsGameVersionTooOld()) LogTooOld();
-                else if (IsGameVersionTooNew()) LogTooNew();
                 else if (IsGameVersionNewerThanTarget())
                 {
                     Logger.LogWarning(
@@ -264,14 +272,6 @@ namespace ValheimPlus
                 $"\"{MinSupportedGameVersion}\", but this game version is older at \"{Version.CurrentVersion}\". " +
                 "Please either update the Valheim game, or use an older version of Valheim Plus as per " +
                 "https://github.com/Grantapher/ValheimPlus/blob/grantapher-development/COMPATIBILITY.md.");
-        }
-
-        private static void LogTooNew()
-        {
-            Logger.LogError(
-                $"This version of Valheim Plus ({FullVersion}) expects a maximum game version of " +
-                $"\"{MaxKnownWorkingGameVersion}\", but this game version is newer at \"{Version.CurrentVersion}\". " +
-                "Please update Valheim Plus via the releases: https://github.com/Grantapher/ValheimPlus/releases");
         }
 
         public static void UnpatchSelf()
