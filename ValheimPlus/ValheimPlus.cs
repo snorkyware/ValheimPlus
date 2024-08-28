@@ -29,7 +29,7 @@ namespace ValheimPlus
         public const string NumericVersion = "0.9.14.0";
 
         // Extra version, like alpha/beta/rc/stable. Can leave blank if a stable release.
-        private const string VersionExtra = "-alpha04";
+        private const string VersionExtra = "";
 
         // Version used when numeric is NOT required (Logging, config file lookup)
         public const string FullVersion = NumericVersion + VersionExtra;
@@ -41,18 +41,16 @@ namespace ValheimPlus
         private static readonly GameVersion MinSupportedGameVersion = new(0, 218, 16);
 
         // The game version this version of V+ was compiled against.
-        private static readonly GameVersion TargetGameVersion = new(0, 218, 17);
+        private static readonly GameVersion TargetGameVersion = new(0, 218, 21);
 
         // Versions we know for sure will not work with this game version.
         // Useful if a PTB is active to exclude it from the stable release.
         // ReSharper disable once CollectionNeverUpdated.Local
         private static readonly Dictionary<GameVersion, string> ExcludeGameVersions = new()
         {
-            // [new GameVersion(0, 218, 19)] =
-            //     $"This version of Valheim Plus ({FullVersion}) does not work with the current Valheim game version " +
-            //     $"({Version.CurrentVersion}), to use this Valheim game version, update Valheim Plus (possibly to an" +
-            //     " alpha version): https://github.com/Grantapher/ValheimPlus/releases. If you don't want to use an " +
-            //     "alpha version, update the Valheim game version to one compatible with this one."
+            [new GameVersion(0, 218, 19)] =
+                $"This version of Valheim Plus ({FullVersion}) does not work with the current Valheim game version " +
+                $"({Version.CurrentVersion}). Update the Valheim game."
         };
 
         internal static string newestVersion { get; private set; } = "";
