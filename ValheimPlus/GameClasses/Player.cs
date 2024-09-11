@@ -244,8 +244,8 @@ namespace ValheimPlus.GameClasses
                 VPlusMapSync.ShouldSyncOnSpawn = false;
             }
 
-            if (Configuration.Current.Player.IsEnabled && Configuration.Current.Player.skipIntro)
-                __instance.m_firstSpawn = false;
+            if (Configuration.Current.Player.IsEnabled && Configuration.Current.Player.skipIntro && Game.instance.m_playerProfile != null)
+                Game.instance.m_playerProfile.m_firstSpawn = false;
 
         }
     }
